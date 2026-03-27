@@ -177,7 +177,7 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      <header className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 sm:mb-8 text-center sm:text-left">
+      <header className="flex flex-row justify-between items-center gap-4 mb-6 sm:mb-8 text-left">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -189,27 +189,24 @@ const Dashboard = () => {
         <div className="flex gap-2 sm:gap-3">
           <button 
             onClick={() => navigate('/')}
-            className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center gap-2"
+            className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center justify-center"
           >
             <Home className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="font-bold text-sm">Home</span>
           </button>
           
           {auth.currentUser ? (
             <button 
               onClick={handleLogout}
-              className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center gap-2"
+              className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center justify-center"
             >
               <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="font-bold text-sm">Logout</span>
             </button>
           ) : (
             <button 
               onClick={() => navigate('/login')}
-              className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center gap-2"
+              className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center justify-center"
             >
               <User className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="font-bold text-sm">Log In</span>
             </button>
           )}
         </div>
