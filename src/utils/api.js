@@ -46,5 +46,30 @@ export const api = {
       console.error('API Error (getMessages):', error);
       throw error;
     }
+  },
+
+  /**
+   * Reports a message
+   * @param {Object} reportData { messageId, recipientId, text, senderId }
+   */
+  async reportMessage(reportData) {
+    try {
+      const response = await fetch(`${API_URL}/messages/report`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to report message via API');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (reportMessage):', error);
+      throw error;
+    }
   }
 };

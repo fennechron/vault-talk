@@ -4,7 +4,7 @@ import { collection, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore'
 import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, LogOut, Search, Inbox as InboxIcon, Users, MessageSquare, X, CheckCircle, ArrowRight, Home, Lock, Mail, Key } from 'lucide-react';
+import { Send, User, LogOut, Search, Inbox as InboxIcon, Users, MessageSquare, X, CheckCircle, ArrowRight, Home, Lock, Mail, Key, AlertTriangle } from 'lucide-react';
 import { api } from '../utils/api';
 import CryptoJS from 'crypto-js';
 
@@ -13,10 +13,8 @@ const Dashboard = () => {
   const [messages, setMessages] = useState([]);
   const [activeTab, setActiveTab] = useState('members'); // 'members' or 'inbox'
   const [searchTerm, setSearchTerm] = useState('');
-  const [replyText, setReplyText] = useState('');
-  const [replyingTo, setReplyingTo] = useState(null);
-  const [isSendingReply, setIsSendingReply] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [reportingMsgId, setReportingMsgId] = useState(null);
+  const [showReportSuccess, setShowReportSuccess] = useState(false);
   const navigate = useNavigate();
 
   const [authError, setAuthError] = useState('');
@@ -139,26 +137,22 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  const handleSendReply = async (e) => {
-    e.preventDefault();
-    if (!replyText.trim() || !replyingTo) return;
-
-    setIsSendingReply(true);
+  const handleReport = async (msg) => {
+    setReportingMsgId(msg.id);
     try {
-      await api.sendMessage({
-        recipientId: replyingTo.senderId,
-        senderId: auth.currentUser?.uid,
-        text: replyText,
-        replyToId: replyingTo.id // Track which message this is a reply to
+      await api.reportMessage({
+        messageId: msg.id,
+        recipientId: auth.currentUser?.email,
+        text: msg.text,
+        senderId: msg.senderId
       });
-      setReplyText('');
-      setReplyingTo(null);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2000);
+      setShowReportSuccess(true);
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isReported: true } : m));
+      setTimeout(() => setShowReportSuccess(false), 2000);
     } catch (error) {
-      alert("Error sending reply: " + error.message);
+      alert("Error reporting message: " + error.message);
     } finally {
-      setIsSendingReply(false);
+      setReportingMsgId(null);
     }
   };
 
@@ -170,15 +164,15 @@ const Dashboard = () => {
     <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
       {/* Success Notification */}
       <AnimatePresence>
-        {showSuccess && (
+        {showReportSuccess && (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-8 left-1/2 -translate-x-1/2 z-50 bg-pink-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2 font-bold"
+            className="fixed top-8 left-1/2 -translate-x-1/2 z-50 bg-rose-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2 font-bold"
           >
-            <CheckCircle className="w-5 h-5" />
-            Reply Sent Successfully!
+            <AlertTriangle className="w-5 h-5" />
+            Message Reported Successfully!
           </motion.div>
         )}
       </AnimatePresence>
@@ -406,23 +400,24 @@ const Dashboard = () => {
                     
                     <p className="text-base sm:text-xl font-medium text-slate-700 leading-relaxed mb-6 italic">"{msg.text}"</p>
                     
-                    {msg.senderId === 'anonymous' ? (
-                      <div className="flex items-center gap-2 text-slate-400 font-black text-xs sm:text-sm">
-                        <span>GUEST MESSAGE (NO REPLY)</span>
-                      </div>
-                    ) : msg.isReplied ? (
-                      <div className="flex items-center gap-2 text-slate-400 font-black text-xs sm:text-sm">
-                        <CheckCircle className="w-4 h-4 text-pink-500" />
-                        <span>REPLIED</span>
+                    {msg.isReported ? (
+                      <div className="flex justify-end">
+                        <div className="flex items-center gap-2 text-rose-500 font-bold text-xs sm:text-sm bg-rose-50 px-3 py-1.5 rounded-full border border-rose-100 shadow-sm">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span>REPORTED</span>
+                        </div>
                       </div>
                     ) : (
-                      <button 
-                        onClick={() => setReplyingTo(msg)}
-                        className="flex items-center gap-2 text-pink-500 font-black text-xs sm:text-sm hover:gap-3 transition-all"
-                      >
-                        <span>REPLY ANONYMOUSLY</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
+                      <div className="flex justify-end">
+                        <button 
+                          onClick={() => handleReport(msg)}
+                          disabled={reportingMsgId === msg.id}
+                          className="flex items-center gap-2 text-rose-400 font-bold text-xs sm:text-sm hover:text-rose-600 transition-all disabled:opacity-50"
+                        >
+                          <AlertTriangle className="w-4 h-4" />
+                          <span>{reportingMsgId === msg.id ? 'REPORTING...' : 'REPORT MESSAGE'}</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </motion.div>
@@ -432,61 +427,7 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      {/* Reply Modal */}
-      <AnimatePresence>
-        {replyingTo && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setReplyingTo(null)}
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-2xl sm:rounded-[2.5rem] w-full max-w-lg shadow-2xl relative overflow-hidden mx-2 sm:mx-0"
-            >
-              <div className="p-5 sm:p-8">
-                <div className="flex justify-between items-center mb-4 sm:mb-6">
-                  <h3 className="text-lg sm:text-2xl font-black text-slate-800">Reply Anonymously</h3>
-                  <button onClick={() => setReplyingTo(null)} className="p-2 hover:bg-pink-50 rounded-full transition-colors">
-                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
-                  </button>
-                </div>
-                
-                <div className="bg-pink-50 border border-pink-100 p-3 sm:p-4 rounded-xl sm:rounded-2xl mb-4 sm:mb-6">
-                  <p className="text-slate-400 text-[8px] sm:text-xs font-bold uppercase tracking-widest mb-1 sm:mb-2">Replying to:</p>
-                  <p className="text-xs sm:text-base text-slate-600 font-medium italic line-clamp-3">"{replyingTo.text}"</p>
-                </div>
 
-                <form onSubmit={handleSendReply}>
-                  <textarea 
-                    className="w-full bg-pink-50/30 border-2 border-pink-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 focus:outline-none focus:border-pink-200 focus:ring-4 focus:ring-pink-50 transition-all min-h-[100px] sm:min-h-[150px] text-sm sm:text-lg font-medium resize-none mb-4 sm:mb-6 placeholder:text-pink-200 text-slate-700"
-                    placeholder="Type your reply here..."
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    required
-                  />
-                  <button 
-                    disabled={isSendingReply}
-                    className="w-full accent-gradient py-3.5 sm:py-5 rounded-xl sm:rounded-2xl font-black text-white text-base sm:text-xl hover:opacity-90 transition-all shadow-xl shadow-pink-200 flex items-center justify-center gap-3 disabled:opacity-50"
-                  >
-                    {isSendingReply ? 'Sending...' : (
-                      <>
-                        <Send className="w-5 h-5 sm:w-6 sm:h-6" />
-                        <span>Send Reply</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

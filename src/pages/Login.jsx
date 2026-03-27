@@ -212,7 +212,7 @@ const Login = () => {
       </motion.div>
 
       <footer className="sm:absolute bottom-8 left-0 right-0 text-center text-slate-400 text-xs sm:text-sm font-medium pb-8 sm:pb-0">
-        <p>© 2026 VaultTalk. Developed by Fennechron Labs.</p>
+        <p>© 2026 VaultTalk. Developed by <a href="https://fennechron.com" target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-500 font-bold transition-colors">Fennechron Labs</a>.</p>
       </footer>
     </div>
   );
