@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile, sendEmailVerification } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogIn, UserPlus, Mail, Lock, Github, User, ShieldAlert } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, Github, User, ShieldAlert, CheckCircle } from 'lucide-react';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,6 +13,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -22,6 +23,7 @@ const Login = () => {
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (!validateEmail(email)) {
       setError('Please use your college ID (e.g., chn22csd301@ceconline.edu)');
@@ -36,7 +38,7 @@ const Login = () => {
         // Check if user document exists using EMAIL, create if not
         const userRef = doc(db, 'users', email);
         const userSnap = await getDoc(userRef);
-        
+
         if (!userSnap.exists()) {
           await setDoc(userRef, {
             name: user.displayName || email.split('@')[0].toUpperCase(),
@@ -46,13 +48,17 @@ const Login = () => {
             lastLogin: new Date()
           });
         }
+        navigate('/dashboard');
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        
+
         // Update Firebase Auth Profile
         await updateProfile(user, { displayName: name });
-        
+
+        // Send Verification Email
+        await sendEmailVerification(user);
+
         // Save to Firestore 'users' collection using EMAIL
         await setDoc(doc(db, 'users', email), {
           name: name,
@@ -61,8 +67,10 @@ const Login = () => {
           createdAt: new Date(),
           lastLogin: new Date()
         });
+
+        setSuccess('Account created! A verification email has been sent to ' + email + '. Please verify your email before logging in.');
+        setIsLogin(true); // Switch to login mode
       }
-      navigate('/dashboard');
     } catch (error) {
       setError(error.message);
     }
@@ -74,14 +82,14 @@ const Login = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      
+
       if (!validateEmail(user.email)) {
         // Sign out if not a college email
         await auth.signOut();
         setError('Only @ceconline.edu emails are allowed.');
         return;
       }
-      
+
       // Ensure Google users are also in the 'users' collection using EMAIL
       await setDoc(doc(db, 'users', user.email), {
         name: user.displayName,
@@ -90,7 +98,7 @@ const Login = () => {
         photoURL: user.photoURL,
         lastLogin: new Date()
       }, { merge: true });
-      
+
       navigate('/dashboard');
     } catch (error) {
       setError(error.message);
@@ -103,7 +111,7 @@ const Login = () => {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-pink-300/30 blur-[120px] rounded-full pointer-events-none z-0"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-rose-300/30 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.7, type: 'spring', bounce: 0.4 }}
@@ -124,7 +132,7 @@ const Login = () => {
         <form onSubmit={handleAuth} className="space-y-3 sm:space-y-4">
           <AnimatePresence>
             {error && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -134,19 +142,30 @@ const Login = () => {
                 {error}
               </motion.div>
             )}
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-emerald-50 border border-emerald-100 text-emerald-600 p-3 rounded-xl text-xs font-bold flex items-center gap-2 mb-4"
+              >
+                <CheckCircle className="w-4 h-4 shrink-0" />
+                {success}
+              </motion.div>
+            )}
           </AnimatePresence>
 
           {!isLogin && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="relative"
             >
               <LogIn className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5 invisible" /> {/* Placeholder spacing */}
               <User className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5" />
-              <input 
-                type="text" 
-                placeholder="Full Name" 
+              <input
+                type="text"
+                placeholder="Full Name"
                 className="w-full bg-pink-50/30 border border-pink-100 rounded-lg sm:rounded-xl py-3 sm:py-3.5 pl-11 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all font-light placeholder:text-pink-200 text-sm sm:text-base"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -156,9 +175,9 @@ const Login = () => {
           )}
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5" />
-            <input 
-              type="email" 
-              placeholder="Email Address" 
+            <input
+              type="email"
+              placeholder="Email Address"
               className="w-full bg-pink-50/30 border border-pink-100 rounded-lg sm:rounded-xl py-3 sm:py-3.5 pl-11 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all font-light placeholder:text-pink-200 text-sm sm:text-base"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -167,18 +186,18 @@ const Login = () => {
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5" />
-            <input 
-              type="password" 
-              placeholder="Password" 
+            <input
+              type="password"
+              placeholder="Password"
               className="w-full bg-pink-50/30 border border-pink-100 rounded-lg sm:rounded-xl py-3 sm:py-3.5 pl-11 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all font-light placeholder:text-pink-200 text-sm sm:text-base"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             className="w-full accent-gradient py-3.5 sm:py-4 rounded-lg sm:rounded-xl font-bold text-white hover:opacity-90 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-2 text-base sm:text-lg"
           >
             {isLogin ? <LogIn className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
@@ -192,7 +211,7 @@ const Login = () => {
           <div className="h-px bg-pink-100 flex-1"></div>
         </div>
 
-        <button 
+        <button
           onClick={signInWithGoogle}
           className="w-full bg-white border border-pink-100 py-3 sm:py-3.5 rounded-lg sm:rounded-xl font-semibold text-slate-600 hover:bg-pink-50 transition-all flex items-center justify-center gap-3 shadow-sm text-sm sm:text-base"
         >
@@ -202,7 +221,7 @@ const Login = () => {
 
         <p className="mt-6 sm:mt-8 text-center text-slate-400 text-xs sm:text-sm">
           {isLogin ? "Don't have an account?" : "Already have an account?"}
-          <button 
+          <button
             onClick={() => setIsLogin(!isLogin)}
             className="ml-2 text-pink-500 hover:text-pink-600 transition-colors font-bold"
           >

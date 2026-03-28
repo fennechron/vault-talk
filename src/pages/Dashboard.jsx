@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../firebase';
 import { collection, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore';
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, reload, signOut } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, LogOut, Search, Inbox as InboxIcon, Users, MessageSquare, X, CheckCircle, ArrowRight, Home, Lock, Mail, Key, AlertTriangle, Heart, Bell } from 'lucide-react';
+import { Send, User, LogOut, Search, Inbox as InboxIcon, Users, MessageSquare, X, CheckCircle, ArrowRight, Home, Lock, Mail, Key, AlertTriangle, Heart, Bell, RefreshCw, UserPlus } from 'lucide-react';
 import { api } from '../utils/api';
 import CryptoJS from 'crypto-js';
 
@@ -20,12 +20,18 @@ const Dashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNoNotifToast, setShowNoNotifToast] = useState(false);
   const [showReportSuccess, setShowReportSuccess] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const navigate = useNavigate();
 
   const [authError, setAuthError] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [signupName, setSignupName] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [authSuccess, setAuthSuccess] = useState('');
 
   const currentUserEmail = auth.currentUser?.email;
   const unreadCount = messages.filter(m => !m.viewed).length;
@@ -33,7 +39,7 @@ const Dashboard = () => {
   // Check for sender feedback notifications
   useEffect(() => {
     const checkNotifications = async () => {
-      const id = auth.currentUser?.email || localStorage.getItem('vaulttalk_temp_id');
+      const id = auth.currentUser?.email || localStorage.getItem('whisp_temp_id');
       if (id) {
         try {
           const notifs = await api.getNotifications(id);
@@ -47,13 +53,13 @@ const Dashboard = () => {
   }, [auth.currentUser]);
 
   const handleClearNotifications = async () => {
-    const id = auth.currentUser?.email || localStorage.getItem('vaulttalk_temp_id');
+    const id = auth.currentUser?.email || localStorage.getItem('whisp_temp_id');
     if (id) {
       try {
         await api.clearNotifications(id);
         setNotifications([]);
         if (!auth.currentUser) {
-          localStorage.removeItem('vaulttalk_temp_id');
+          localStorage.removeItem('whisp_temp_id');
         }
       } catch (error) {
         console.error("Failed to clear notifications:", error);
@@ -98,7 +104,7 @@ const Dashboard = () => {
           const msgs = await api.getMessages(currentUserEmail);
 
           // Decrypt messages
-          const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || 'vaulttalk-default-secret-key';
+          const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || 'whisp-default-secret-key';
           const decryptedMsgs = msgs.map(msg => {
             try {
               const bytes = CryptoJS.AES.decrypt(msg.text, encryptionKey);
@@ -128,9 +134,10 @@ const Dashboard = () => {
     }
   }, [currentUserEmail]);
 
-  const handleEmailSignIn = async (e) => {
+  const handleEmailAuth = async (e) => {
     e.preventDefault();
     setAuthError('');
+    setAuthSuccess('');
     setIsAuthenticating(true);
 
     if (!loginEmail.toLowerCase().endsWith('@ceconline.edu')) {
@@ -140,18 +147,46 @@ const Dashboard = () => {
     }
 
     try {
-      const result = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
-      const loggedInUser = result.user;
+      if (isSignUp) {
+        if (!signupName.trim()) {
+          setAuthError('Full name is required for sign up.');
+          setIsAuthenticating(false);
+          return;
+        }
 
-      // Update lastLogin
-      await setDoc(doc(db, 'users', loggedInUser.email), {
-        lastLogin: new Date()
-      }, { merge: true });
+        const userCredential = await createUserWithEmailAndPassword(auth, loginEmail, loginPassword);
+        const user = userCredential.user;
 
+        // Update Firebase Auth Profile
+        await updateProfile(user, { displayName: signupName });
+
+        // Send Verification Email
+        await sendEmailVerification(user);
+
+        // Save to Firestore 'users' collection using EMAIL
+        await setDoc(doc(db, 'users', loginEmail), {
+          name: signupName,
+          email: loginEmail,
+          id: loginEmail,
+          createdAt: new Date(),
+          lastLogin: new Date()
+        });
+
+        setAuthSuccess('Account created! A verification email has been sent to ' + loginEmail + '. Please verify before viewing your inbox.');
+        setIsSignUp(false); // Switch to login mode
+      } else {
+        const result = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+        const loggedInUser = result.user;
+
+        // Update lastLogin
+        await setDoc(doc(db, 'users', loggedInUser.email), {
+          lastLogin: new Date()
+        }, { merge: true });
+      }
       setIsAuthenticating(false);
     } catch (error) {
       if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        setAuthError('Invalid email or password. If you haven\'t set a password yet, please go to the main Login page to Sign Up first.');
+        setAuthError('Invalid email or password. If you haven\'t set a password yet, please sign up first.');
       } else {
         setAuthError(error.message);
       }
@@ -247,6 +282,42 @@ const Dashboard = () => {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!auth.currentUser) return;
+    setResendingEmail(true);
+    try {
+      await sendEmailVerification(auth.currentUser);
+      setResendSuccess('Verification email sent! Please check your inbox.');
+      setTimeout(() => setResendSuccess(''), 5000);
+    } catch (error) {
+      alert("Error sending verification email: " + error.message);
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+
+  const handleRefreshStatus = async () => {
+    if (!auth.currentUser) return;
+    setRefreshing(true);
+    try {
+      await reload(auth.currentUser);
+      // After reload, the auth state in the SDK might not update immediately in the component
+      // but auth.currentUser.emailVerified will be updated.
+      if (auth.currentUser.emailVerified) {
+        // Force a re-render or just let the component naturally reactive to auth changes
+        // Actually auth changes don't always trigger re-render unless we use an observer or state
+        // Let's just navigate to same page or window reload to be safe and simple
+        window.location.reload();
+      } else {
+        alert("Email is still not verified. Please check your inbox and click the verification link.");
+      }
+    } catch (error) {
+      console.error("Error reloading user:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const filteredUsers = users
     .filter(user => user.name?.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -285,7 +356,7 @@ const Dashboard = () => {
             <Home className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
-          {(auth.currentUser || localStorage.getItem('vaulttalk_temp_id')) && (
+          {(auth.currentUser || localStorage.getItem('whisp_temp_id')) && (
             <button
               onClick={() => {
                 if (notifications.length > 0) {
@@ -390,7 +461,7 @@ const Dashboard = () => {
                 {notifications.map((notif) => {
                   let displayText = notif.text;
                   try {
-                    const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || 'vaulttalk-default-secret-key';
+                    const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || 'whisp-default-secret-key';
                     const bytes = CryptoJS.AES.decrypt(notif.text, encryptionKey);
                     const decrypted = bytes.toString(CryptoJS.enc.Utf8);
                     if (decrypted) displayText = decrypted;
@@ -479,11 +550,15 @@ const Dashboard = () => {
               >
                 <div className="absolute top-0 right-0 w-48 h-48 bg-pink-100/50 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
                 <div className="w-20 h-20 bg-pink-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-pink-200/50 rotate-3">
-                  <Lock className="w-10 h-10 text-pink-500" />
+                  {isSignUp ? <UserPlus className="w-10 h-10 text-pink-500" /> : <Lock className="w-10 h-10 text-pink-500" />}
                 </div>
-                <h3 className="text-2xl sm:text-4xl font-black text-slate-800 mb-4 tracking-tight">Unlock Your Inbox</h3>
+                <h3 className="text-2xl sm:text-4xl font-black text-slate-800 mb-4 tracking-tight">
+                  {isSignUp ? 'Create Account' : 'Unlock Your Inbox'}
+                </h3>
                 <p className="text-slate-500 font-medium mb-8 px-6 text-sm sm:text-lg">
-                  Sign in with your <strong className="text-pink-500">@ceconline.edu</strong> email to securely view your messages.
+                  {isSignUp ? 'Join the class to start receiving messages.' : 'Sign in with your '}
+                  {!isSignUp && <strong className="text-pink-500">@ceconline.edu</strong>}
+                  {!isSignUp && ' email to securely view your messages.'}
                 </p>
 
                 <AnimatePresence>
@@ -497,9 +572,32 @@ const Dashboard = () => {
                       {authError}
                     </motion.div>
                   )}
+                  {authSuccess && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="mb-6 px-6 text-emerald-600 text-xs sm:text-sm font-bold bg-emerald-50 py-3 rounded-xl mx-6 sm:mx-12 border border-emerald-100"
+                    >
+                      {authSuccess}
+                    </motion.div>
+                  )}
                 </AnimatePresence>
 
-                <form onSubmit={handleEmailSignIn} className="w-full px-6 sm:px-12 flex flex-col gap-3 sm:gap-4 mb-6">
+                <form onSubmit={handleEmailAuth} className="w-full px-6 sm:px-12 flex flex-col gap-3 sm:gap-4 mb-6">
+                  {isSignUp && (
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Full Name"
+                        value={signupName}
+                        onChange={(e) => setSignupName(e.target.value)}
+                        required={isSignUp}
+                        className="w-full bg-pink-50/30 border border-pink-100 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all font-light placeholder:text-pink-200 text-sm sm:text-base text-slate-700"
+                      />
+                    </div>
+                  )}
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5 pointer-events-none" />
                     <input
@@ -525,9 +623,9 @@ const Dashboard = () => {
                   <button
                     type="submit"
                     disabled={isAuthenticating}
-                    className="w-full accent-gradient py-3.5 mt-2 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-lg shadow-pink-200 disabled:opacity-50 text-sm sm:text-base"
+                    className="w-full accent-gradient py-3.5 mt-2 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-lg shadow-pink-200 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center gap-2"
                   >
-                    {isAuthenticating ? 'Authenticating...' : 'Sign In'}
+                    {isAuthenticating ? 'Authenticating...' : (isSignUp ? 'Create Account' : 'Sign In')}
                   </button>
                 </form>
 
@@ -548,8 +646,74 @@ const Dashboard = () => {
                 </button>
 
                 <p className="mt-8 text-xs text-slate-400 font-medium">
-                  Don't have a password yet? <Link to="/login" className="text-pink-500 font-bold hover:underline">Sign up here</Link>.
+                  {isSignUp ? 'Already have an account?' : "Don't have a password yet?"}
+                  <button
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setAuthError('');
+                      setAuthSuccess('');
+                    }}
+                    className="ml-2 text-pink-500 font-bold hover:underline"
+                  >
+                    {isSignUp ? 'Sign in here' : 'Sign up here'}
+                  </button>
                 </p>
+              </motion.div>
+            ) : !auth.currentUser.emailVerified ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-16 sm:py-24 bg-white/70 backdrop-blur-md rounded-[2rem] sm:rounded-[3rem] border border-pink-100 shadow-2xl max-w-xl mx-auto relative overflow-hidden px-6"
+              >
+                <div className="w-20 h-20 bg-rose-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-200/50 rotate-3">
+                  <Mail className="w-10 h-10 text-rose-500" />
+                </div>
+                <h3 className="text-2xl sm:text-4xl font-black text-slate-800 mb-4 tracking-tight">Verify Your Email</h3>
+                <p className="text-slate-500 font-medium mb-8 text-sm sm:text-lg">
+                  We've sent a verification link to <strong className="text-pink-500">{auth.currentUser.email}</strong>.
+                  Please verify your email to unlock your inbox.
+                </p>
+
+                <AnimatePresence>
+                  {resendSuccess && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="mb-6 text-emerald-600 text-xs sm:text-sm font-bold bg-emerald-50 py-3 rounded-xl border border-emerald-100"
+                    >
+                      {resendSuccess}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="flex flex-col gap-4">
+                  <button
+                    onClick={handleRefreshStatus}
+                    disabled={refreshing}
+                    className="w-full accent-gradient py-4 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-3 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+                    {refreshing ? 'Checking status...' : "I've Verified My Email"}
+                  </button>
+
+                  <button
+                    onClick={handleResendVerification}
+                    disabled={resendingEmail}
+                    className="w-full bg-white border-2 border-pink-100 py-3 rounded-xl font-bold text-pink-500 hover:bg-pink-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                    {resendingEmail ? 'Sending...' : 'Resend Verification Email'}
+                  </button>
+
+                  <button
+                    onClick={() => signOut(auth)}
+                    className="mt-4 text-slate-400 hover:text-slate-600 font-bold transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout and try another account
+                  </button>
+                </div>
               </motion.div>
             ) : messages.length === 0 ? (
               <div className="text-center py-20 bg-white/70 backdrop-blur-md rounded-[3rem] border border-pink-100 shadow-xl">

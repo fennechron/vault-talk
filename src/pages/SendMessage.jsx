@@ -40,10 +40,10 @@ const SendMessage = () => {
     try {
       const getSenderId = () => {
         if (auth.currentUser?.email) return auth.currentUser.email;
-        let tempId = localStorage.getItem('vaulttalk_temp_id');
+        let tempId = localStorage.getItem('whisp_temp_id');
         if (!tempId) {
           tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
-          localStorage.setItem('vaulttalk_temp_id', tempId);
+          localStorage.setItem('whisp_temp_id', tempId);
         }
         return tempId;
       };

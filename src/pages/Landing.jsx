@@ -6,13 +6,12 @@ import { Shield, Lock, ArrowRight, LayoutDashboard } from 'lucide-react';
 
 const Landing = () => {
   const navigate = useNavigate();
-  const user = auth.currentUser;
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Navbar */}
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center relative z-10">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-2"
@@ -22,8 +21,8 @@ const Landing = () => {
           </div>
           <span className="text-xl sm:text-2xl font-black text-slate-800 tracking-tighter">Whisp</span>
         </motion.div>
-        
-        <motion.button 
+
+        <motion.button
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => navigate('/dashboard')}
@@ -46,7 +45,7 @@ const Landing = () => {
           transition={{ duration: 1, type: 'spring', bounce: 0.4 }}
           className="relative z-10 flex flex-col items-center"
         >
-          <motion.div 
+          <motion.div
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             className="inline-flex items-center gap-2 bg-pink-50 border border-pink-100 px-4 py-1.5 rounded-full mb-6 sm:mb-8 shadow-sm"
@@ -60,11 +59,11 @@ const Landing = () => {
             <span className="text-pink-500">Stay Anonymous.</span>
           </h1>
           <p className="text-base sm:text-xl md:text-2xl text-slate-500 max-w-2xl mx-auto mb-8 sm:mb-12 font-medium leading-relaxed px-2 sm:px-0">
-            VaultTalk is a secure platform to share feedback and connect with your classmates honestly. Your identity is always protected.
+            Whisp is a secure platform to share feedback and connect with your classmates honestly. Your identity is always protected.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mt-4">
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/dashboard')}
@@ -72,7 +71,7 @@ const Landing = () => {
             >
               Get Started <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </motion.button>
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="w-full sm:w-auto bg-white border-2 border-pink-50 px-8 sm:px-10 py-4 sm:py-5 rounded-2xl sm:rounded-3xl text-slate-700 font-bold text-lg sm:text-xl hover:bg-pink-50/50 hover:border-pink-100 hover:text-pink-600 transition-colors shadow-sm"
