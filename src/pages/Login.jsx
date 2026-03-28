@@ -68,7 +68,7 @@ const Login = () => {
           lastLogin: new Date()
         });
 
-        setSuccess('Account created! A verification email has been sent to ' + email + '. Please verify your email before logging in.');
+        setSuccess('Account created! A verification email has been sent to ' + email + '. Please verify your email before logging in.If not found in inbox check spam folder');
         setIsLogin(true); // Switch to login mode
       }
     } catch (error) {
