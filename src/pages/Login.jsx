@@ -91,13 +91,22 @@ const Login = () => {
       }
 
       // Ensure Google users are also in the 'users' collection using EMAIL
-      await setDoc(doc(db, 'users', user.email), {
-        name: user.displayName,
+      const userRef = doc(db, 'users', user.email);
+      const userSnap = await getDoc(userRef);
+
+      const userData = {
         email: user.email,
         id: user.email,
         photoURL: user.photoURL,
         lastLogin: new Date()
-      }, { merge: true });
+      };
+
+      // Only set name if it's a new user
+      if (!userSnap.exists()) {
+        userData.name = user.displayName;
+      }
+
+      await setDoc(userRef, userData, { merge: true });
 
       navigate('/dashboard');
     } catch (error) {

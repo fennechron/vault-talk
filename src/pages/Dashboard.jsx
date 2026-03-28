@@ -33,8 +33,21 @@ const Dashboard = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [authSuccess, setAuthSuccess] = useState('');
 
+  const [currentUserData, setCurrentUserData] = useState(null);
   const currentUserEmail = auth.currentUser?.email;
   const unreadCount = messages.filter(m => !m.viewed).length;
+
+  // Fetch current user's Firestore data for the header name
+  useEffect(() => {
+    if (currentUserEmail) {
+      const unsub = onSnapshot(doc(db, 'users', currentUserEmail), (doc) => {
+        if (doc.exists()) {
+          setCurrentUserData(doc.data());
+        }
+      });
+      return () => unsub();
+    }
+  }, [currentUserEmail]);
 
   // Check for sender feedback notifications
   useEffect(() => {
@@ -210,13 +223,22 @@ const Dashboard = () => {
       }
 
       // Ensure Google users are also in the 'users' collection
-      await setDoc(doc(db, 'users', loggedInUser.email), {
-        name: loggedInUser.displayName,
+      const userRef = doc(db, 'users', loggedInUser.email);
+      const userSnap = await getDoc(userRef);
+
+      const userData = {
         email: loggedInUser.email,
         id: loggedInUser.email,
         photoURL: loggedInUser.photoURL,
         lastLogin: new Date()
-      }, { merge: true });
+      };
+
+      // Only set name if it's a new user
+      if (!userSnap.exists()) {
+        userData.name = loggedInUser.displayName;
+      }
+
+      await setDoc(userRef, userData, { merge: true });
 
       setIsAuthenticating(false);
     } catch (error) {
@@ -345,7 +367,7 @@ const Dashboard = () => {
           animate={{ opacity: 1, x: 0 }}
         >
           <Link to="/" className="text-3xl sm:text-4xl font-black text-pink-500 inline-block hover:opacity-80 transition-opacity">Whisp</Link>
-          <p className="text-slate-500 text-sm sm:text-base font-medium">Hello, {auth.currentUser?.displayName || 'Dear Classmate'}</p>
+          <p className="text-slate-500 text-sm sm:text-base font-medium">Hello, {currentUserData?.name || auth.currentUser?.displayName || 'Dear Classmate'}</p>
         </motion.div>
 
         <div className="flex gap-2 sm:gap-3">
