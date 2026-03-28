@@ -20,7 +20,7 @@ const Landing = () => {
           <div className="w-8 h-8 sm:w-10 sm:h-10 accent-gradient rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-pink-200">
             <Lock className="text-white w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <span className="text-xl sm:text-2xl font-black text-slate-800 tracking-tighter">VaultTalk</span>
+          <span className="text-xl sm:text-2xl font-black text-slate-800 tracking-tighter">Whisp</span>
         </motion.div>
         
         <motion.button 
