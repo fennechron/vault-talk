@@ -273,7 +273,7 @@ const Dashboard = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Link to="/" className="text-3xl sm:text-4xl font-black text-pink-500 inline-block hover:opacity-80 transition-opacity">VaultTalk</Link>
+          <Link to="/" className="text-3xl sm:text-4xl font-black text-pink-500 inline-block hover:opacity-80 transition-opacity">Whisp</Link>
           <p className="text-slate-500 text-sm sm:text-base font-medium">Hello, {auth.currentUser?.displayName || 'Dear Classmate'}</p>
         </motion.div>
 
