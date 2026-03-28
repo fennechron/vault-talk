@@ -35,12 +35,22 @@ const SendMessage = () => {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
-    
+
     setLoading(true);
     try {
+      const getSenderId = () => {
+        if (auth.currentUser?.email) return auth.currentUser.email;
+        let tempId = localStorage.getItem('vaulttalk_temp_id');
+        if (!tempId) {
+          tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem('vaulttalk_temp_id', tempId);
+        }
+        return tempId;
+      };
+
       await api.sendMessage({
         recipientId: userId,
-        senderId: auth.currentUser?.uid || 'anonymous',
+        senderId: getSenderId(),
         text: message,
       });
       setIsSent(true);
@@ -62,7 +72,7 @@ const SendMessage = () => {
 
       <AnimatePresence mode="wait">
         {!isSent ? (
-          <motion.div 
+          <motion.div
             key="form"
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -72,8 +82,8 @@ const SendMessage = () => {
           >
             {/* Background design element */}
             <div className="absolute top-0 right-0 w-32 h-32 accent-gradient opacity-10 blur-3xl -mr-16 -mt-16 rounded-full"></div>
-            
-            <button 
+
+            <button
               onClick={() => navigate('/dashboard')}
               className="mb-6 sm:mb-8 flex items-center gap-2 text-pink-400 hover:text-pink-600 transition-colors font-semibold text-sm sm:text-base"
             >
@@ -95,16 +105,16 @@ const SendMessage = () => {
             </div>
 
             <form onSubmit={handleSend} className="space-y-4 sm:space-y-6">
-              <textarea 
+              <textarea
                 className="w-full bg-white border-2 border-pink-50 rounded-xl sm:rounded-2xl p-4 sm:p-8 focus:outline-none focus:border-pink-200 focus:ring-4 focus:ring-pink-50 transition-all min-h-[120px] sm:min-h-[180px] text-sm sm:text-lg font-medium resize-none shadow-inner placeholder:text-pink-200 text-slate-700"
                 placeholder={`Share your thoughts or feedback anonymously...`}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
               />
-              
-              <button 
-                type="submit" 
+
+              <button
+                type="submit"
                 disabled={loading}
                 className="w-full accent-gradient py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-white text-lg sm:text-xl hover:opacity-90 transition-all shadow-xl shadow-pink-200 flex items-center justify-center gap-3 disabled:opacity-50"
               >
@@ -118,7 +128,7 @@ const SendMessage = () => {
             </form>
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             key="success"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -130,7 +140,7 @@ const SendMessage = () => {
             <h2 className="text-2xl sm:text-4xl font-black mb-2 text-slate-800 tracking-tight">Message Sent!</h2>
             <p className="text-slate-500 text-sm sm:text-lg font-medium">Successfully sent your anonymous message.</p>
             <div className="w-12 h-1.5 bg-pink-100 rounded-full mt-6 sm:mt-8 overflow-hidden">
-               <div className="h-full bg-pink-500 w-1/2 animate-shimmer-loading"></div>
+              <div className="h-full bg-pink-500 w-1/2 animate-shimmer-loading"></div>
             </div>
             <p className="text-pink-300 mt-4 text-[10px] sm:text-sm font-bold uppercase tracking-widest">Redirecting you back...</p>
           </motion.div>

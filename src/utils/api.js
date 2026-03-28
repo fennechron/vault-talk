@@ -71,5 +71,119 @@ export const api = {
       console.error('API Error (reportMessage):', error);
       throw error;
     }
+  },
+
+  /**
+   * Likes a message
+   * @param {string} recipientId
+   * @param {string} messageId
+   */
+  async likeMessage(recipientId, messageId) {
+    try {
+      const response = await fetch(`${API_URL}/messages/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recipientId, messageId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to like message via API');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (likeMessage):', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Reacts to a message with an emoji.
+   * @param {string} recipientId
+   * @param {string} messageId
+   * @param {string} reaction
+   */
+  async reactToMessage(recipientId, messageId, reaction) {
+    try {
+      const response = await fetch(`${API_URL}/messages/react`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recipientId, messageId, reaction }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to react via API');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (reactToMessage):', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Marks all messages for a recipient as read.
+   * @param {string} recipientId
+   */
+  async markAllAsRead(recipientId) {
+    try {
+      const response = await fetch(`${API_URL}/messages/read-all`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recipientId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark all as read via API');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (markAllAsRead):', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetches notifications for a sender.
+   * @param {string} senderId
+   */
+  async getNotifications(senderId) {
+    try {
+      const response = await fetch(`${API_URL}/notifications?senderId=${senderId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch notifications via API');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (getNotifications):', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Clears notifications for a sender.
+   * @param {string} senderId
+   */
+  async clearNotifications(senderId) {
+    try {
+      const response = await fetch(`${API_URL}/notifications?senderId=${senderId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to clear notifications via API');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (clearNotifications):', error);
+      throw error;
+    }
   }
 };
