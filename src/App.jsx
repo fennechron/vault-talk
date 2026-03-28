@@ -95,6 +95,18 @@ function App() {
                     </div>
 
                     <div className="flex items-start gap-4 p-4 bg-white/50 rounded-2xl border border-pink-50 hover:border-pink-200 transition-colors group">
+  <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-all">
+    <UserX className="w-5 h-5 text-pink-500 group-hover:text-white" />
+  </div>
+  <div className="text-left">
+    <h4 className="font-bold text-slate-700 text-sm">No Name Mentions</h4>
+    <p className="text-xs text-slate-500">
+      Do not mention anyone’s name in your message to keep it fully anonymous.
+    </p>
+  </div>
+</div>
+
+                    <div className="flex items-start gap-4 p-4 bg-white/50 rounded-2xl border border-pink-50 hover:border-pink-200 transition-colors group">
                       <div className="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-all">
                         <Lock className="w-5 h-5 text-pink-500 group-hover:text-white" />
                       </div>
