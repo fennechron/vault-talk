@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth } from './firebase';
-import { Gavel, AlertTriangle, Shield, Lock, CheckCircle2 } from 'lucide-react';
+import { Gavel, AlertTriangle, Shield, Lock, CheckCircle2,UserX } from 'lucide-react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import SendMessage from './pages/SendMessage';
