@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowLeft, ShieldCheck, CheckCircle } from 'lucide-react';
+import { Send, ArrowLeft, ShieldCheck, CheckCircle, UserX } from 'lucide-react';
 import { api } from '../utils/api';
 
 const SendMessage = () => {
@@ -13,6 +13,8 @@ const SendMessage = () => {
   const [message, setMessage] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [checkingBlock, setCheckingBlock] = useState(true);
 
   useEffect(() => {
     const fetchRecipient = async () => {
@@ -31,6 +33,39 @@ const SendMessage = () => {
     };
     fetchRecipient();
   }, [userId]);
+
+  useEffect(() => {
+    const checkBlockStatus = async () => {
+      const getSenderId = () => {
+        if (auth.currentUser?.email) return auth.currentUser.email;
+        return localStorage.getItem('whisp_temp_id');
+      };
+
+      // Check localStorage first for immediate feedback
+      if (localStorage.getItem('whisp_blocked_status') === 'true') {
+        setIsBlocked(true);
+        setCheckingBlock(false);
+        return;
+      }
+
+      const sId = getSenderId();
+      if (sId) {
+        try {
+          const data = await api.getMyInfractions(sId);
+          if (data.isBlocked) {
+            setIsBlocked(true);
+            localStorage.setItem('whisp_blocked_status', 'true');
+          } else {
+            localStorage.removeItem('whisp_blocked_status');
+          }
+        } catch (err) {
+          console.error("Block check failed:", err);
+        }
+      }
+      setCheckingBlock(false);
+    };
+    checkBlockStatus();
+  }, []);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -56,7 +91,11 @@ const SendMessage = () => {
       setIsSent(true);
       setTimeout(() => navigate('/dashboard'), 2000);
     } catch (error) {
-      alert("Error sending message: " + error.message);
+      if (error.message.includes('403') || error.message.toLowerCase().includes('disabled')) {
+        setIsBlocked(true);
+      } else {
+        alert("Error sending message: " + error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -71,7 +110,29 @@ const SendMessage = () => {
       <div className="absolute bottom-[-5%] left-[-5%] w-[400px] h-[400px] bg-rose-300/30 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
       <AnimatePresence mode="wait">
-        {!isSent ? (
+        {isBlocked ? (
+          <motion.div
+            key="blocked"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center text-center p-8 sm:p-12 bg-white border border-rose-100 rounded-2xl sm:rounded-[3rem] shadow-2xl backdrop-blur-md w-full max-w-md mx-auto relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-full -mr-16 -mt-16 opacity-50 blur-2xl"></div>
+            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-rose-50 rounded-2xl flex items-center justify-center mb-6 sm:mb-8 border border-rose-100 shadow-xl shimmer">
+              <UserX className="text-rose-500 w-8 h-8 sm:w-12 sm:h-12" />
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black mb-4 text-slate-800 tracking-tight">Access Disabled</h2>
+            <p className="text-slate-500 text-sm sm:text-lg font-medium mb-8">
+              Your ability to send messages has been disabled due to violations of our <span className="text-rose-500 font-bold">Community Standards</span>.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full bg-slate-100 py-4 rounded-xl font-black text-slate-600 hover:bg-slate-200 transition-all text-sm uppercase tracking-widest"
+            >
+              Back to Dashboard
+            </button>
+          </motion.div>
+        ) : !isSent ? (
           <motion.div
             key="form"
             initial={{ opacity: 0, scale: 0.9, y: 30 }}

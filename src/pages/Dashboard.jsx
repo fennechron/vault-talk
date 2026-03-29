@@ -23,6 +23,7 @@ const Dashboard = () => {
   const [resendingEmail, setResendingEmail] = useState(false);
   const [resendSuccess, setResendSuccess] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [infractionData, setInfractionData] = useState({ warnings: 0, isBlocked: false });
   const navigate = useNavigate();
 
   const [authError, setAuthError] = useState('');
@@ -48,6 +49,28 @@ const Dashboard = () => {
       return () => unsub();
     }
   }, [currentUserEmail]);
+
+  // Check for infractions (warnings/blocks)
+  useEffect(() => {
+    const checkInfractions = async () => {
+      const id = auth.currentUser?.email || localStorage.getItem('whisp_temp_id');
+      if (id) {
+        try {
+          const data = await api.getMyInfractions(id);
+          setInfractionData(data);
+          if (data.isBlocked) {
+            localStorage.setItem('whisp_blocked_status', 'true');
+          } else {
+            localStorage.removeItem('whisp_blocked_status');
+          }
+        } catch (error) {
+          console.error("Failed to fetch infractions:", error);
+        }
+      }
+    };
+    checkInfractions();
+    // Re-check periodically or on refocus? Let's just do it on mount/entry
+  }, [auth.currentUser, activeTab]);
 
   // Check for sender feedback notifications
   useEffect(() => {
@@ -346,6 +369,63 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+      {/* Blocked Overlay */}
+      <AnimatePresence>
+        {infractionData.isBlocked && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-xl flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="glass-morphism p-8 sm:p-12 rounded-[2.5rem] w-full max-w-lg shadow-2xl relative overflow-hidden text-center border border-rose-500/30"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500 rounded-full -mr-16 -mt-16 opacity-20 blur-3xl"></div>
+              <div className="w-20 h-20 sm:w-28 sm:h-28 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-rose-100 shadow-xl shimmer">
+                <UserX className="text-rose-500 w-10 h-10 sm:w-16 sm:h-16" />
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black mb-6 text-white tracking-tight">Access Disabled</h2>
+              <p className="text-slate-300 text-lg sm:text-xl font-medium mb-10 leading-relaxed">
+                Your account and device have been restricted due to multiple violations of our <span className="text-rose-400 font-bold decoration-rose-500/50 underline-offset-4 underline">Community Standards</span>.
+              </p>
+              <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-2xl mb-8">
+                <p className="text-rose-400 text-sm font-bold uppercase tracking-widest">Permanent Device Block</p>
+              </div>
+              <button
+                onClick={() => navigate('/')}
+                className="w-full bg-white border-2 border-slate-100 py-4 rounded-2xl font-black text-slate-800 hover:bg-slate-50 transition-all text-sm uppercase tracking-widest shadow-lg"
+              >
+                Return to Home
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Warning Banner */}
+      <AnimatePresence>
+        {infractionData.warnings > 0 && !infractionData.isBlocked && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 flex items-center gap-4 shadow-lg shadow-amber-200/20"
+          >
+            <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-amber-200">
+              <AlertTriangle className="text-white w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-black text-amber-800 text-sm uppercase tracking-tight">Safety Warning</h4>
+              <p className="text-amber-700 text-xs font-medium">
+                You have received <span className="font-black text-rose-600 px-1.5 py-0.5 bg-rose-50 rounded-md mx-0.5 shadow-sm">{infractionData.warnings}</span> {infractionData.warnings === 1 ? 'warning' : 'warnings'}.
+                Continued violations of community standards will result in a <span className="font-bold underline">permanent device block</span>.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Success Notification */}
       <AnimatePresence>
         {showReportSuccess && (
