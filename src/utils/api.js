@@ -9,13 +9,15 @@ export const api = {
   /**
    * Sends an anonymous message via the API.
    * @param {Object} messageData { recipientId, senderId, text }
+   * @param {string} idToken Firebase ID token for authentication
    */
-  async sendMessage(messageData) {
+  async sendMessage(messageData, idToken) {
     try {
       const response = await fetch(`${API_URL}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
         },
         body: JSON.stringify(messageData),
       });
@@ -183,6 +185,101 @@ export const api = {
       return await response.json();
     } catch (error) {
       console.error('API Error (clearNotifications):', error);
+      throw error;
+    }
+  },
+  /**
+   * Fetches warning/block status for the current user.
+   * @param {string} userId
+   */
+  async getMyInfractions(userId) {
+    try {
+      const response = await fetch(`${API_URL}/my-infractions?userId=${userId}`);
+      if (!response.ok) throw new Error('Failed to fetch infractions');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (getMyInfractions):', error);
+      throw error;
+    }
+  },
+  /**
+   * Admin: Fetches all reports.
+   * @param {string} adminPassword
+   */
+  async getAdminReports(adminPassword) {
+    try {
+      const response = await fetch(`${API_URL}/admin/reports`, {
+        headers: {
+          'Authorization': adminPassword
+        }
+      });
+      if (!response.ok) throw new Error('Unauthorized or failed to fetch reports');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (getAdminReports):', error);
+      throw error;
+    }
+  },
+  /**
+   * Admin: Issues a warning to a user.
+   * @param {string} adminPassword
+   * @param {string} userId
+   */
+  async issueWarning(adminPassword, userId) {
+    try {
+      const response = await fetch(`${API_URL}/admin/warning`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': adminPassword
+        },
+        body: JSON.stringify({ userId }),
+      });
+      if (!response.ok) throw new Error('Failed to issue warning');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (issueWarning):', error);
+      throw error;
+    }
+  },
+  /**
+   * Admin: Blocks a user.
+   * @param {string} adminPassword
+   * @param {string} userId
+   */
+  async blockUser(adminPassword, userId) {
+    try {
+      const response = await fetch(`${API_URL}/admin/block`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': adminPassword
+        },
+        body: JSON.stringify({ userId }),
+      });
+      if (!response.ok) throw new Error('Failed to block user');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (blockUser):', error);
+      throw error;
+    }
+  },
+  /**
+   * Admin: Fetches infraction data for a user.
+   * @param {string} adminPassword
+   * @param {string} userId
+   */
+  async getInfractions(adminPassword, userId) {
+    try {
+      const response = await fetch(`${API_URL}/admin/infractions/${userId}`, {
+        headers: {
+          'Authorization': adminPassword
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch infractions');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (getInfractions):', error);
       throw error;
     }
   }

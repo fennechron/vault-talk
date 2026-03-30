@@ -4,7 +4,7 @@ import { collection, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore'
 import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, reload, signOut } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, LogOut, Search, Inbox as InboxIcon, Users, MessageSquare, X, CheckCircle, ArrowRight, Home, Lock, Mail, Key, AlertTriangle, Heart, Bell, RefreshCw, UserPlus } from 'lucide-react';
+import { Send, User, LogOut, Search, Inbox as InboxIcon, Users, MessageSquare, X, CheckCircle, ArrowRight, Home, Lock, Mail, Activity, AlertTriangle, Zap, Bell, RefreshCw, UserPlus, Skull, ShieldAlert, Terminal, Plus } from 'lucide-react';
 import { api } from '../utils/api';
 import CryptoJS from 'crypto-js';
 
@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [reportingMsgId, setReportingMsgId] = useState(null);
   const [likingMsgId, setLikingMsgId] = useState(null);
   const [emojiPickerMsgId, setEmojiPickerMsgId] = useState(null);
+  const [isEmojiPickerExpanded, setIsEmojiPickerExpanded] = useState(false);
   const [longPressTimer, setLongPressTimer] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [showNoNotifToast, setShowNoNotifToast] = useState(false);
@@ -309,7 +310,7 @@ const Dashboard = () => {
         ));
       }, 1000);
     } catch (error) {
-      console.error("Error liking message:", error);
+      console.error("Error with appreciation:", error);
     } finally {
       setLikingMsgId(null);
     }
@@ -381,18 +382,18 @@ const Dashboard = () => {
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              className="glass-morphism p-8 sm:p-12 rounded-[2.5rem] w-full max-w-lg shadow-2xl relative overflow-hidden text-center border border-rose-500/30"
+              className="bg-slate-950 border-2 border-red-900/40 p-8 sm:p-12 rounded-[2.5rem] w-full max-w-lg shadow-2xl relative overflow-hidden text-center backdrop-blur-xl"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500 rounded-full -mr-16 -mt-16 opacity-20 blur-3xl"></div>
-              <div className="w-20 h-20 sm:w-28 sm:h-28 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-rose-100 shadow-xl shimmer">
-                <UserX className="text-rose-500 w-10 h-10 sm:w-16 sm:h-16" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full -mr-16 -mt-16 opacity-20 blur-3xl"></div>
+              <div className="w-20 h-20 sm:w-28 sm:h-28 bg-red-950/20 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-red-900/30 shadow-xl shimmer">
+                <Skull className="text-red-600 w-10 h-10 sm:w-16 sm:h-16" />
               </div>
-              <h2 className="text-3xl sm:text-5xl font-black mb-6 text-white tracking-tight">Access Disabled</h2>
-              <p className="text-slate-300 text-lg sm:text-xl font-medium mb-10 leading-relaxed">
-                Your account and device have been restricted due to multiple violations of our <span className="text-rose-400 font-bold decoration-rose-500/50 underline-offset-4 underline">Community Standards</span>.
+              <h2 className="text-3xl sm:text-5xl font-black mb-6 text-white tracking-tight uppercase italic">Account Blocked</h2>
+              <p className="text-slate-400 text-lg sm:text-xl font-black mb-10 leading-relaxed uppercase tracking-tighter">
+                Your account has been blocked due to multiple violations of our <span className="text-red-600 font-black decoration-red-900 underline-offset-4 underline tracking-widest">COMMUNITY RULES</span>.
               </p>
-              <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-2xl mb-8">
-                <p className="text-rose-400 text-sm font-bold uppercase tracking-widest">Permanent Device Block</p>
+              <div className="bg-red-900/20 border border-red-900/40 p-4 rounded-2xl mb-8">
+                <p className="text-red-500 text-xs font-black uppercase tracking-[0.3em]">Permanent Account Block</p>
               </div>
               <button
                 onClick={() => navigate('/')}
@@ -411,16 +412,16 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 flex items-center gap-4 shadow-lg shadow-amber-200/20"
+            className="mb-6 bg-red-950/20 border-2 border-red-900/40 rounded-2xl p-4 flex items-center gap-4 shadow-lg shadow-red-900/10"
           >
-            <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-amber-200">
-              <AlertTriangle className="text-white w-6 h-6" />
+            <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-950">
+              <ShieldAlert className="text-white w-6 h-6" />
             </div>
             <div className="flex-1">
-              <h4 className="font-black text-amber-800 text-sm uppercase tracking-tight">Safety Warning</h4>
-              <p className="text-amber-700 text-xs font-medium">
-                You have received <span className="font-black text-rose-600 px-1.5 py-0.5 bg-rose-50 rounded-md mx-0.5 shadow-sm">{infractionData.warnings}</span> {infractionData.warnings === 1 ? 'warning' : 'warnings'}.
-                Continued violations of community standards will result in a <span className="font-bold underline">permanent device block</span>.
+              <h4 className="font-black text-red-500 text-xs uppercase tracking-widest">Warning</h4>
+              <p className="text-slate-400 text-[10px] font-black uppercase tracking-tight">
+                Warning count: <span className="text-red-500 px-2 py-0.5 bg-red-950/40 rounded-md mx-0.5 border border-red-900/20">{infractionData.warnings}</span>.
+                Further violations will result in <span className="text-red-500 underline underline-offset-2">Account Suspension</span>.
               </p>
             </div>
           </motion.div>
@@ -433,7 +434,7 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-8 left-1/2 -translate-x-1/2 z-50 bg-rose-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2 font-bold"
+            className="fixed top-8 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2 font-black uppercase text-xs sm:text-sm tracking-widest border border-red-900/30"
           >
             <AlertTriangle className="w-5 h-5" />
             Message Reported Successfully!
@@ -446,14 +447,14 @@ const Dashboard = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Link to="/" className="text-3xl sm:text-4xl font-black text-pink-500 inline-block hover:opacity-80 transition-opacity">Whisp</Link>
-          <p className="text-slate-500 text-sm sm:text-base font-medium">Hello, {currentUserData?.name || auth.currentUser?.displayName || 'Dear Classmate'}</p>
+          <Link to="/" className="text-3xl sm:text-4xl font-black text-red-600 inline-block hover:opacity-80 transition-opacity tracking-tighter uppercase italic">Whisp</Link>
+          <p className="text-slate-500 text-[10px] sm:text-xs font-semibold uppercase tracking-widest mt-1">User: {currentUserData?.name || auth.currentUser?.displayName || 'Anonymous'}</p>
         </motion.div>
 
         <div className="flex gap-2 sm:gap-3">
           <button
             onClick={() => navigate('/')}
-            className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center justify-center"
+            className="p-2.5 sm:p-3 bg-slate-900 border border-red-900/20 rounded-xl sm:rounded-2xl hover:bg-red-950/20 text-red-600 transition-all shadow-sm flex items-center justify-center"
           >
             <Home className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
@@ -469,11 +470,11 @@ const Dashboard = () => {
                   setTimeout(() => setShowNoNotifToast(false), 3000);
                 }
               }}
-              className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center justify-center relative"
+              className="p-2.5 sm:p-3 bg-slate-900 border border-red-900/20 rounded-xl sm:rounded-2xl hover:bg-red-950/20 text-red-600 transition-all shadow-sm flex items-center justify-center relative"
             >
               <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
               {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-slate-950 font-black animate-pulse">
                   {notifications.length}
                 </span>
               )}
@@ -483,38 +484,38 @@ const Dashboard = () => {
           {auth.currentUser ? (
             <button
               onClick={handleLogout}
-              className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center justify-center"
+              className="p-2.5 sm:p-3 bg-slate-900 border border-red-900/20 rounded-xl sm:rounded-2xl hover:bg-red-950/20 text-red-600 transition-all shadow-sm flex items-center justify-center"
             >
               <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           ) : (
             <button
               onClick={() => navigate('/login')}
-              className="p-2.5 sm:p-3 bg-white border border-pink-100 rounded-xl sm:rounded-2xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm flex items-center justify-center"
+              className="p-2.5 sm:p-3 bg-slate-900 border border-red-900/20 rounded-xl sm:rounded-2xl hover:bg-red-950/20 text-red-600 transition-all shadow-sm flex items-center justify-center"
             >
-              <User className="w-5 h-5 sm:w-6 sm:h-6" />
+              <Terminal className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           )}
         </div>
       </header>
 
       {/* Tabs */}
-      <div className="flex p-1 bg-pink-50/50 rounded-xl sm:rounded-[2rem] mb-6 sm:mb-8 border border-pink-100/50">
+      <div className="flex p-1 bg-slate-900 border border-red-900/20 rounded-xl sm:rounded-[2rem] mb-6 sm:mb-8">
         <button
           onClick={() => setActiveTab('members')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 sm:py-4 rounded-lg sm:rounded-[1.5rem] font-bold text-xs sm:text-base transition-all ${activeTab === 'members' ? 'bg-white text-pink-500 shadow-sm' : 'text-slate-400 hover:text-pink-400'}`}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 sm:py-4 rounded-lg sm:rounded-[1.5rem] font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all ${activeTab === 'members' ? 'bg-red-600 text-white shadow-xl shadow-red-900/20' : 'text-slate-500 hover:text-red-400'}`}
         >
-          <Users className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-          Classmates
+          <Activity className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+          Users
         </button>
         <button
           onClick={() => setActiveTab('inbox')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 sm:py-4 rounded-lg sm:rounded-[1.5rem] font-bold text-xs sm:text-base transition-all ${activeTab === 'inbox' ? 'bg-white text-pink-500 shadow-sm' : 'text-slate-400 hover:text-pink-400'}`}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 sm:py-4 rounded-lg sm:rounded-[1.5rem] font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all ${activeTab === 'inbox' ? 'bg-red-600 text-white shadow-xl shadow-red-900/20' : 'text-slate-500 hover:text-red-400'}`}
         >
           <InboxIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-          Inbox
+          Messages
           {auth.currentUser && unreadCount > 0 && (
-            <span className="bg-pink-500 text-white text-[8px] sm:text-[10px] w-3.5 h-3.5 sm:w-5 sm:h-5 flex items-center justify-center rounded-full">
+            <span className="bg-white text-red-600 text-[8px] sm:text-[10px] w-3.5 h-3.5 sm:w-5 sm:h-5 flex items-center justify-center rounded-full font-black">
               {unreadCount}
             </span>
           )}
@@ -530,8 +531,8 @@ const Dashboard = () => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 backdrop-blur-md"
           >
-            <Bell className="w-5 h-5 text-pink-400" />
-            <span className="font-bold text-sm tracking-wide uppercase">No new engagement feedback yet!</span>
+            <Bell className="w-5 h-5 text-red-600" />
+            <span className="font-bold text-sm tracking-wide uppercase">No new likes or reactions yet!</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -546,15 +547,15 @@ const Dashboard = () => {
             className="mb-8 overflow-hidden"
             id="feedback-section"
           >
-            <div className="bg-white/80 backdrop-blur-md border-2 border-pink-100 rounded-3xl p-6 shadow-xl relative group">
+            <div className="bg-slate-950/80 backdrop-blur-md border-2 border-red-900/30 rounded-3xl p-6 shadow-xl relative group">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white text-xs font-black">!</div>
-                  <h3 className="font-black text-slate-800 uppercase tracking-widest text-sm">Engagement Feedback</h3>
+                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-black">!</div>
+                  <h3 className="font-black text-white uppercase tracking-widest text-xs sm:text-sm">Notifications</h3>
                 </div>
                 <button
                   onClick={handleClearNotifications}
-                  className="text-slate-400 hover:text-rose-500 transition-colors"
+                  className="text-slate-500 hover:text-red-500 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -570,15 +571,15 @@ const Dashboard = () => {
                   } catch (e) { }
 
                   return (
-                    <div key={notif.id} className="flex items-center gap-4 bg-pink-50/50 p-3 rounded-2xl border border-pink-100/50">
-                      <div className="text-2xl">
-                        {notif.type === 'like' ? '❤️' : notif.reaction}
+                    <div key={notif.id} className="flex items-center gap-4 bg-red-950/20 p-3 rounded-2xl border border-red-900/30">
+                      <div className="text-2xl text-red-500">
+                        {notif.type === 'like' ? <Zap className="w-6 h-6 fill-red-600" /> : notif.reaction}
                       </div>
                       <div className="flex-1">
-                        <p className="text-slate-600 font-medium text-sm">
-                          Someone {notif.type === 'like' ? 'liked' : 'reacted to'} your anonymous message.
+                        <p className="text-slate-300 font-black text-[10px] sm:text-xs uppercase tracking-tighter">
+                          Someone {notif.type === 'like' ? 'liked' : 'reacted to'} your message.
                         </p>
-                        <p className="text-slate-400 text-[10px] font-bold mt-1 uppercase italic truncate max-w-[200px]">
+                        <p className="text-red-900 text-[11px] font-bold italic truncate max-w-[200px] mt-0.5">
                           "{displayText}"
                         </p>
                       </div>
@@ -586,7 +587,7 @@ const Dashboard = () => {
                   );
                 })}
               </div>
-              <p className="text-pink-300 text-[9px] font-black uppercase tracking-[0.2em] mt-4 text-center">Tap the X to dismiss and clear your temp session</p>
+              <p className="text-red-900 text-[9px] font-black uppercase tracking-[0.2em] mt-4 text-center">Log out to clear notifications</p>
             </div>
           </motion.div>
         )}
@@ -601,11 +602,11 @@ const Dashboard = () => {
             exit={{ opacity: 0, x: 10 }}
           >
             <div className="relative mb-6 sm:mb-8">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search for a classmate..."
-                className="w-full bg-white border border-pink-100 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 pl-12 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all text-base sm:text-lg font-light shadow-sm placeholder:text-pink-200"
+                placeholder="Search for users..."
+                className="w-full bg-slate-900 border border-red-900/30 rounded-xl sm:rounded-2xl py-3.5 sm:py-4 pl-12 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all text-base sm:text-lg font-black uppercase placeholder:text-slate-700 text-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -618,18 +619,18 @@ const Dashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02 }}
-                  whileHover={{ scale: 1.03, y: -4, rotate: index % 2 === 0 ? 1 : -1 }}
+                  whileHover={{ scale: 1.03, y: -4, rotate: index % 2 === 0 ? 0.5 : -0.5 }}
                   whileTap={{ scale: 0.98 }}
-                  className="glass-morphism rounded-2xl sm:rounded-3xl p-4 sm:p-5 cursor-pointer group hover:border-pink-300 transition-all border border-pink-50 shadow-sm bg-white/60 hover:shadow-[0_20px_40px_rgba(244,114,182,0.15)]"
+                  className="glass-morphism rounded-2xl sm:rounded-3xl p-4 sm:p-5 cursor-pointer group hover:border-red-600 transition-all border border-red-900/20 shadow-sm bg-slate-900/60 hover:shadow-[0_20px_40px_rgba(153,27,27,0.15)]"
                   onClick={() => navigate(`/message/${user.id}`)}
                 >
                   <div className="flex flex-row sm:flex-col items-center sm:text-center gap-4 sm:gap-3">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-pink-50 flex items-center justify-center border border-pink-100 text-xl sm:text-2xl font-black text-pink-500 group-hover:bg-pink-500 group-hover:text-white transition-all shrink-0">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-red-950/40 flex items-center justify-center border border-red-900/30 text-xl sm:text-2xl font-black text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all shrink-0">
                       {user.name.charAt(0)}
                     </div>
                     <div className="flex flex-col sm:items-center overflow-hidden flex-1">
-                      <h3 className="font-bold text-slate-700 group-hover:text-pink-500 transition-colors truncate w-full text-base sm:text-lg">{user.name}</h3>
-                      <div className="bg-pink-50 text-pink-400 px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest inline-block mt-1">Send Message</div>
+                      <h3 className="font-bold text-slate-200 group-hover:text-red-500 transition-colors truncate w-full text-sm sm:text-base tracking-tight italic">{user.name}</h3>
+                      <div className="bg-red-900/20 text-red-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block mt-1 border border-red-900/40">Send Message</div>
                     </div>
                   </div>
                 </motion.div>
@@ -648,19 +649,19 @@ const Dashboard = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-16 sm:py-24 bg-white/70 backdrop-blur-md rounded-[2rem] sm:rounded-[3rem] border border-pink-100 shadow-2xl max-w-xl mx-auto relative overflow-hidden"
+                className="text-center py-16 sm:py-24 bg-slate-950/70 backdrop-blur-xl rounded-[2rem] sm:rounded-[3rem] border border-red-900/30 shadow-2xl max-w-xl mx-auto relative overflow-hidden"
               >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-pink-100/50 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
-                <div className="w-20 h-20 bg-pink-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-pink-200/50 rotate-3">
-                  {isSignUp ? <UserPlus className="w-10 h-10 text-pink-500" /> : <Lock className="w-10 h-10 text-pink-500" />}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-red-900/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                <div className="w-20 h-20 bg-red-950/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-900/20 rotate-3 border border-red-900/30">
+                  {isSignUp ? <UserPlus className="w-10 h-10 text-red-600" /> : <Lock className="w-10 h-10 text-red-600" />}
                 </div>
-                <h3 className="text-2xl sm:text-4xl font-black text-slate-800 mb-4 tracking-tight">
-                  {isSignUp ? 'Create Account' : 'Unlock Your Inbox'}
+                <h3 className="text-2xl sm:text-4xl font-black text-white mb-4 tracking-tightest uppercase italic">
+                  {isSignUp ? 'CREATE ACCOUNT' : 'PRIVATE INBOX'}
                 </h3>
-                <p className="text-slate-500 font-medium mb-8 px-6 text-sm sm:text-lg">
-                  {isSignUp ? 'Join the class to start receiving messages.' : 'Sign in with your '}
-                  {!isSignUp && <strong className="text-pink-500">@ceconline.edu</strong>}
-                  {!isSignUp && ' email to securely view your messages.'}
+                <p className="text-slate-500 font-black mb-8 px-6 text-[10px] sm:text-xs uppercase tracking-widest">
+                  {isSignUp ? 'Sign up to start messaging.' : 'Log in with your '}
+                  {!isSignUp && <strong className="text-red-600">@ceconline.edu</strong>}
+                  {!isSignUp && ' account to see your messages.'}
                 </p>
 
                 <AnimatePresence>
@@ -669,7 +670,7 @@ const Dashboard = () => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="mb-6 px-6 text-rose-500 text-xs sm:text-sm font-bold bg-rose-50 py-3 rounded-xl mx-6 sm:mx-12 border border-rose-100"
+                      className="mb-6 px-6 text-red-600 text-xs font-black bg-red-950/20 py-3 rounded-xl mx-6 sm:mx-12 border border-red-900/40 uppercase tracking-tighter"
                     >
                       {authError}
                     </motion.div>
@@ -679,7 +680,7 @@ const Dashboard = () => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="mb-6 px-6 text-emerald-600 text-xs sm:text-sm font-bold bg-emerald-50 py-3 rounded-xl mx-6 sm:mx-12 border border-emerald-100"
+                      className="mb-6 px-6 text-emerald-500 text-xs font-black bg-emerald-950/20 py-3 rounded-xl mx-6 sm:mx-12 border border-emerald-900/40 uppercase tracking-tighter"
                     >
                       {authSuccess}
                     </motion.div>
@@ -689,75 +690,75 @@ const Dashboard = () => {
                 <form onSubmit={handleEmailAuth} className="w-full px-6 sm:px-12 flex flex-col gap-3 sm:gap-4 mb-6">
                   {isSignUp && (
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5 pointer-events-none" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5 pointer-events-none" />
                       <input
                         type="text"
-                        placeholder="Full Name"
+                        placeholder="Identification Name"
                         value={signupName}
                         onChange={(e) => setSignupName(e.target.value)}
                         required={isSignUp}
-                        className="w-full bg-pink-50/30 border border-pink-100 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all font-light placeholder:text-pink-200 text-sm sm:text-base text-slate-700"
+                        className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-black placeholder:text-slate-700 text-sm sm:text-base text-white"
                       />
                     </div>
                   )}
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5 pointer-events-none" />
+                    <Activity className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5 pointer-events-none" />
                     <input
                       type="email"
-                      placeholder="College Email Address"
+                      placeholder="Protocol Address (@ceconline.edu)"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
-                      className="w-full bg-pink-50/30 border border-pink-100 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all font-light placeholder:text-pink-200 text-sm sm:text-base text-slate-700"
+                      className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-black placeholder:text-slate-700 text-sm sm:text-base text-white"
                     />
                   </div>
                   <div className="relative">
-                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5 pointer-events-none" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5 pointer-events-none" />
                     <input
                       type="password"
-                      placeholder="Password"
+                      placeholder="Protocol Key"
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
-                      className="w-full bg-pink-50/30 border border-pink-100 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all font-light placeholder:text-pink-200 text-sm sm:text-base text-slate-700"
+                      className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-black placeholder:text-slate-700 text-sm sm:text-base text-white"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={isAuthenticating}
-                    className="w-full accent-gradient py-3.5 mt-2 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-lg shadow-pink-200 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center gap-2"
+                    className="w-full accent-gradient py-3.5 mt-2 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-lg shadow-red-900/30 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center gap-2 uppercase tracking-widest shimmer"
                   >
-                    {isAuthenticating ? 'Authenticating...' : (isSignUp ? 'Create Account' : 'Sign In')}
+                    {isAuthenticating ? 'AUTHENTICATING...' : (isSignUp ? 'INITIALIZE UNIT' : 'ESTABLISH LINKS')}
                   </button>
                 </form>
 
-                <div className="flex items-center gap-4 px-6 sm:px-12 mb-6 opacity-60">
-                  <div className="h-px bg-pink-200 flex-1"></div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-pink-500">OR</span>
-                  <div className="h-px bg-pink-200 flex-1"></div>
+                <div className="flex items-center gap-4 px-6 sm:px-12 mb-6 opacity-40">
+                  <div className="h-px bg-red-900/50 flex-1"></div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">OR</span>
+                  <div className="h-px bg-red-900/50 flex-1"></div>
                 </div>
 
                 <button
                   onClick={handleGoogleSignIn}
                   disabled={isAuthenticating}
                   type="button"
-                  className="mx-auto bg-white border-2 border-pink-50 py-3 px-6 sm:px-8 rounded-xl font-bold text-slate-600 hover:bg-pink-50 hover:border-pink-200 transition-transform duration-300 flex items-center justify-center gap-3 shadow-[0_5px_15px_rgba(244,114,182,0.1)] hover:-translate-y-1 disabled:opacity-50 text-xs sm:text-sm"
+                  className="mx-auto bg-slate-900 border-2 border-red-900/20 py-3 px-6 sm:px-8 rounded-xl font-black text-slate-400 hover:bg-red-950/20 hover:border-red-900/40 transition-all flex items-center justify-center gap-3 shadow-xl hover:-translate-y-1 disabled:opacity-50 text-[10px] sm:text-xs uppercase tracking-widest group"
                 >
-                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5 grayscale opacity-50 group-hover:opacity-100 group-hover:grayscale-0 transition-all" />
                   Sign in with Google
                 </button>
 
-                <p className="mt-8 text-xs text-slate-400 font-medium">
-                  {isSignUp ? 'Already have an account?' : "Don't have a password yet?"}
+                <p className="mt-8 text-[10px] text-slate-600 font-black uppercase tracking-widest">
+                  {isSignUp ? 'ALREADY HAVE AN ACCOUNT?' : "NEW TO WHISP?"}
                   <button
                     onClick={() => {
                       setIsSignUp(!isSignUp);
                       setAuthError('');
                       setAuthSuccess('');
                     }}
-                    className="ml-2 text-pink-500 font-bold hover:underline"
+                    className="ml-2 text-red-600 font-black hover:underline underline-offset-4 decoration-red-900/50"
                   >
-                    {isSignUp ? 'Sign in here' : 'Sign up here'}
+                    {isSignUp ? 'SIGN IN' : 'SIGN UP'}
                   </button>
                 </p>
               </motion.div>
@@ -765,15 +766,15 @@ const Dashboard = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-16 sm:py-24 bg-white/70 backdrop-blur-md rounded-[2rem] sm:rounded-[3rem] border border-pink-100 shadow-2xl max-w-xl mx-auto relative overflow-hidden px-6"
+                className="text-center py-16 sm:py-24 bg-slate-950/70 backdrop-blur-xl rounded-[2rem] sm:rounded-[3rem] border border-red-900/30 shadow-2xl max-w-xl mx-auto relative overflow-hidden px-6"
               >
-                <div className="w-20 h-20 bg-rose-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-200/50 rotate-3">
-                  <Mail className="w-10 h-10 text-rose-500" />
+                <div className="w-20 h-20 bg-red-950/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-red-900/20 rotate-3 border border-red-900/30">
+                  <Activity className="w-10 h-10 text-red-600" />
                 </div>
-                <h3 className="text-2xl sm:text-4xl font-black text-slate-800 mb-4 tracking-tight">Verify Your Email</h3>
-                <p className="text-slate-500 font-medium mb-8 text-sm sm:text-lg">
-                  We've sent a verification link to <strong className="text-pink-500">{auth.currentUser.email}</strong>.
-                  Please verify your email to unlock your inbox.
+                <h3 className="text-2xl sm:text-4xl font-black text-white mb-4 tracking-tightest uppercase italic">VERIFICATION REQUIRED</h3>
+                <p className="text-slate-500 font-black mb-8 text-[10px] sm:text-xs uppercase tracking-widest leading-relaxed">
+                  Verification email sent to <strong className="text-red-600">{auth.currentUser.email}</strong>.
+                  Check your email to verify your account.
                 </p>
 
                 <AnimatePresence>
@@ -782,7 +783,7 @@ const Dashboard = () => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="mb-6 text-emerald-600 text-xs sm:text-sm font-bold bg-emerald-50 py-3 rounded-xl border border-emerald-100"
+                      className="mb-6 text-emerald-500 text-xs font-black bg-emerald-950/20 py-3 rounded-xl border border-emerald-900/40 uppercase tracking-tighter"
                     >
                       {resendSuccess}
                     </motion.div>
@@ -793,37 +794,37 @@ const Dashboard = () => {
                   <button
                     onClick={handleRefreshStatus}
                     disabled={refreshing}
-                    className="w-full accent-gradient py-4 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-lg shadow-pink-200 flex items-center justify-center gap-3 disabled:opacity-50"
+                    className="w-full accent-gradient py-4 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-xl shadow-red-900/30 flex items-center justify-center gap-3 disabled:opacity-50 uppercase tracking-widest shimmer"
                   >
                     <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-                    {refreshing ? 'Checking status...' : "I've Verified My Email"}
+                    {refreshing ? 'REFRESHING...' : "REFRESH STATUS"}
                   </button>
 
                   <button
                     onClick={handleResendVerification}
                     disabled={resendingEmail}
-                    className="w-full bg-white border-2 border-pink-100 py-3 rounded-xl font-bold text-pink-500 hover:bg-pink-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full bg-slate-900 border-2 border-red-900/20 py-3 rounded-xl font-black text-slate-400 hover:bg-red-950/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-[10px] uppercase tracking-widest"
                   >
-                    <Send className="w-4 h-4" />
-                    {resendingEmail ? 'Sending...' : 'Resend Verification Email'}
+                    <Send className="w-4 h-4 text-red-600" />
+                    {resendingEmail ? 'SENDING...' : 'RESEND EMAIL'}
                   </button>
 
                   <button
                     onClick={() => signOut(auth)}
-                    className="mt-4 text-slate-400 hover:text-slate-600 font-bold transition-colors flex items-center justify-center gap-2 text-sm"
+                    className="mt-4 text-slate-600 hover:text-red-500 font-black transition-colors flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em]"
                   >
                     <LogOut className="w-4 h-4" />
-                    Logout and try another account
+                    LOG OUT
                   </button>
                 </div>
               </motion.div>
             ) : messages.length === 0 ? (
-              <div className="text-center py-20 bg-white/70 backdrop-blur-md rounded-[3rem] border border-pink-100 shadow-xl">
-                <div className="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <MessageSquare className="w-10 h-10 text-pink-200" />
+              <div className="text-center py-20 bg-slate-900 border border-red-900/30 rounded-[3rem] shadow-xl">
+                <div className="w-20 h-20 bg-red-950/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-900/30">
+                  <Skull className="w-10 h-10 text-red-900" />
                 </div>
-                <h3 className="text-2xl font-black text-slate-400">No messages yet</h3>
-                <p className="text-slate-400 font-medium">When you receive anonymous messages, they'll appear here.</p>
+                <h3 className="text-2xl font-black text-slate-700 uppercase tracking-widest italic">EMPTY</h3>
+                <p className="text-slate-500 font-black uppercase text-[10px] sm:text-xs tracking-widest mt-2">No messages found in your inbox.</p>
               </div>
             ) : (
               messages.map((msg, index) => (
@@ -833,143 +834,194 @@ const Dashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   whileHover={{ y: -4 }}
-                  className="bg-white/70 backdrop-blur-md border border-pink-100 rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 shadow-sm relative group overflow-hidden hover:shadow-[0_20px_40px_rgba(244,114,182,0.15)] transition-all"
+                  className={`relative transition-all duration-300 ${emojiPickerMsgId === msg.id ? 'z-[110]' : 'z-10'
+                    }`}
                 >
-                  <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-pink-50/30 rounded-full -translate-y-8 sm:-translate-y-12 translate-x-8 sm:translate-x-12 -z-0"></div>
+                  <div className="bg-slate-950/60 backdrop-blur-md border border-red-900/20 rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 shadow-sm relative group overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-red-900/10 rounded-full -translate-y-8 sm:-translate-y-12 translate-x-8 sm:translate-x-12 -z-0"></div>
 
-                  <div className="relative z-10">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
-                      <div className="bg-pink-50 text-pink-500 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-black tracking-widest uppercase">Anonymous</div>
-                      <span className="text-slate-300 text-[9px] sm:text-xs font-medium">
-                        {msg.createdAt ? new Date(msg.createdAt.seconds ? msg.createdAt.seconds * 1000 : msg.createdAt).toLocaleDateString() : 'Recent'}
-                      </span>
-                    </div>
-
-                    <p className="text-base sm:text-xl font-medium text-slate-700 leading-relaxed mb-6 italic">"{msg.text}"</p>
-
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            onMouseDown={() => {
-                              const timer = setTimeout(() => {
-                                setEmojiPickerMsgId(msg.id);
-                              }, 500);
-                              setLongPressTimer(timer);
-                            }}
-                            onMouseUp={() => {
-                              if (longPressTimer) {
-                                clearTimeout(longPressTimer);
-                                setLongPressTimer(null);
-                                if (!emojiPickerMsgId) handleLike(msg);
-                              }
-                            }}
-                            onMouseLeave={() => {
-                              if (longPressTimer) {
-                                clearTimeout(longPressTimer);
-                                setLongPressTimer(null);
-                              }
-                            }}
-                            onTouchStart={() => {
-                              const timer = setTimeout(() => {
-                                setEmojiPickerMsgId(msg.id);
-                              }, 500);
-                              setLongPressTimer(timer);
-                            }}
-                            onTouchEnd={() => {
-                              if (longPressTimer) {
-                                clearTimeout(longPressTimer);
-                                setLongPressTimer(null);
-                                if (!emojiPickerMsgId) handleLike(msg);
-                              }
-                            }}
-                            disabled={likingMsgId === msg.id}
-                            className={`flex items-center gap-3 px-4 py-2 rounded-2xl transition-all relative overflow-visible ${msg.isLiked ? 'text-pink-600 bg-pink-50' : 'text-slate-400 hover:text-pink-500 hover:bg-pink-50'}`}
-                          >
-                            <motion.div
-                              animate={msg.isAnimating ? {
-                                y: [0, -120, 0],
-                                x: [0, 60, -20, 0],
-                                scale: [1, 2.8, 1],
-                                rotate: [0, 180, 360, 0],
-                                opacity: [1, 0.8, 1]
-                              } : {}}
-                              transition={{
-                                duration: 1,
-                                times: [0, 0.4, 0.8, 1],
-                                ease: "easeInOut"
-                              }}
-                              className="relative z-20 flex items-center justify-center min-w-[1.5rem]"
-                            >
-                              {msg.reaction ? (
-                                <span className="text-2xl leading-none">{msg.reaction}</span>
-                              ) : (
-                                <Heart className={`w-6 h-6 ${msg.isLiked ? 'fill-pink-500 text-pink-500' : ''}`} />
-                              )}
-                            </motion.div>
-
-                            {/* Subtle background pulse when liked/reacted */}
-                            {(msg.isLiked || msg.reaction) && (
-                              <motion.div
-                                initial={{ scale: 0, opacity: 0.5 }}
-                                animate={{ scale: 1.5, opacity: 0 }}
-                                className="absolute inset-0 bg-pink-200 rounded-2xl -z-0"
-                              />
-                            )}
-                          </motion.button>
-
-                          {/* Emoji Picker Overlay */}
-                          <AnimatePresence>
-                            {emojiPickerMsgId === msg.id && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                                animate={{ opacity: 1, y: -60, scale: 1 }}
-                                exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                                className="absolute bottom-full left-0 mb-2 bg-white border border-pink-100 rounded-2xl p-2 shadow-2xl flex gap-2 z-50 items-center backdrop-blur-md bg-white/90"
-                              >
-                                {['❤️', '😂', '👍', '🔥', '😍', '😮'].map((emoji) => (
-                                  <motion.button
-                                    key={emoji}
-                                    whileHover={{ scale: 1.3, rotate: 10 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleReact(msg, emoji);
-                                    }}
-                                    className="text-2xl p-1 hover:bg-pink-50 rounded-lg transition-colors"
-                                  >
-                                    {emoji}
-                                  </motion.button>
-                                ))}
-                                <button
-                                  onClick={() => setEmojiPickerMsgId(null)}
-                                  className="ml-1 p-1 text-slate-400 hover:text-rose-500 transition-colors"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
+                    <div className="relative z-10">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                        <div className="bg-red-950/40 text-red-600 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-black tracking-widest uppercase border border-red-900/30">Anonymous Message</div>
+                        <span className="text-slate-600 text-[9px] sm:text-xs font-black uppercase tracking-widest">
+                          {msg.createdAt ? new Date(msg.createdAt.seconds ? msg.createdAt.seconds * 1000 : msg.createdAt).toLocaleDateString() : 'Active'}
+                        </span>
                       </div>
 
-                      {msg.isReported ? (
-                        <div className="flex items-center gap-2 text-rose-500 font-bold text-xs sm:text-sm bg-rose-50 px-3 py-1.5 rounded-full border border-rose-100 shadow-sm">
-                          <AlertTriangle className="w-4 h-4" />
-                          <span>REPORTED</span>
+                      <p className="text-base sm:text-lg font-medium text-slate-200 leading-relaxed mb-6 italic tracking-normal [word-spacing:0.11em]">"{msg.text}"</p>
+
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onMouseDown={() => {
+                                const timer = setTimeout(() => {
+                                  setEmojiPickerMsgId(msg.id);
+                                }, 500);
+                                setLongPressTimer(timer);
+                              }}
+                              onMouseUp={() => {
+                                if (longPressTimer) {
+                                  clearTimeout(longPressTimer);
+                                  setLongPressTimer(null);
+                                  if (!emojiPickerMsgId) handleLike(msg);
+                                }
+                              }}
+                              onMouseLeave={() => {
+                                if (longPressTimer) {
+                                  clearTimeout(longPressTimer);
+                                  setLongPressTimer(null);
+                                }
+                              }}
+                              onTouchStart={() => {
+                                const timer = setTimeout(() => {
+                                  setEmojiPickerMsgId(msg.id);
+                                }, 500);
+                                setLongPressTimer(timer);
+                              }}
+                              onTouchEnd={() => {
+                                if (longPressTimer) {
+                                  clearTimeout(longPressTimer);
+                                  setLongPressTimer(null);
+                                  if (!emojiPickerMsgId) handleLike(msg);
+                                }
+                              }}
+                              disabled={likingMsgId === msg.id}
+                              className={`flex items-center gap-3 px-4 py-2 rounded-2xl transition-all relative overflow-visible ${msg.isLiked ? 'text-red-600 bg-red-950/20 shadow-[0_0_20px_rgba(153,27,27,0.3)]' : 'text-slate-600 hover:text-red-500 hover:bg-red-950/10'}`}
+                            >
+                              <motion.div
+                                animate={msg.isAnimating ? {
+                                  y: [0, -120, 0],
+                                  x: [0, 60, -20, 0],
+                                  scale: [1, 2.8, 1],
+                                  rotate: [0, 180, 360, 0],
+                                  opacity: [1, 0.8, 1]
+                                } : {}}
+                                transition={{
+                                  duration: 1,
+                                  times: [0, 0.4, 0.8, 1],
+                                  ease: "easeInOut"
+                                }}
+                                className="relative z-20 flex items-center justify-center min-w-[1.5rem]"
+                              >
+                                {msg.reaction ? (
+                                  <span className="text-2xl leading-none">{msg.reaction}</span>
+                                ) : (
+                                  <Zap className={`w-6 h-6 ${msg.isLiked ? 'fill-red-600 text-red-600' : ''}`} />
+                                )}
+                              </motion.div>
+
+                              {/* Subtle background pulse when liked/reacted */}
+                              {(msg.isLiked || msg.reaction) && (
+                                <motion.div
+                                  initial={{ scale: 0, opacity: 0.5 }}
+                                  animate={{ scale: 1.5, opacity: 0 }}
+                                  className="absolute inset-0 bg-red-600 rounded-2xl -z-0"
+                                />
+                              )}
+                            </motion.button>
+
+                            {/* Emoji Picker Overlay */}
+                            <AnimatePresence>
+                              {emojiPickerMsgId === msg.id && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10, scale: 0.9, x: '-50%' }}
+                                  animate={{ opacity: 1, y: -12, scale: 1, x: '-50%' }}
+                                  exit={{ opacity: 0, y: 10, scale: 0.9, x: '-50%' }}
+                                  transition={{ type: 'spring', damping: 15, stiffness: 300 }}
+                                  className={`absolute bottom-full left-52 mb-4 bg-slate-900/95 border border-slate-800/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col gap-1 z-[100] items-center backdrop-blur-2xl transition-all duration-500 whitespace-nowrap min-w-max ${isEmojiPickerExpanded ? 'rounded-[2.5rem] p-3' : 'rounded-full px-4 py-2'
+                                    }`}
+                                >
+                                  {/* Arrow Tail */}
+                                  <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-900"></div>
+
+                                  <div className="flex items-center gap-1">
+                                    {['❤️', '😂', '👍', '🔥', '😍', '😮', '🙂', '🤔'].map((emoji) => (
+                                      <motion.button
+                                        key={emoji}
+                                        whileHover={{ scale: 1.5, y: -8 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleReact(msg, emoji);
+                                          setIsEmojiPickerExpanded(false);
+                                        }}
+                                        className="text-2xl p-1 hover:bg-slate-800/40 rounded-full transition-all duration-200"
+                                      >
+                                        {emoji}
+                                      </motion.button>
+                                    ))}
+                                    {!isEmojiPickerExpanded && (
+                                      <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setIsEmojiPickerExpanded(true);
+                                        }}
+                                        className="p-1.5 bg-red-950/20 text-red-500 rounded-lg hover:bg-red-950/40 transition-colors border border-red-900/20 ml-1"
+                                      >
+                                        <Plus className="w-5 h-5" />
+                                      </motion.button>
+                                    )}
+                                    <button
+                                      onClick={() => {
+                                        setEmojiPickerMsgId(null);
+                                        setIsEmojiPickerExpanded(false);
+                                      }}
+                                      className="ml-1 p-1 text-slate-600 hover:text-red-500 transition-colors"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </div>
+
+                                  {isEmojiPickerExpanded && (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: 'auto' }}
+                                      className="flex items-center gap-1 pb-1"
+                                    >
+                                      {['😡', '😤', '🤬', '😎', '🙏', '💯', '😏', '🤫'].map((emoji) => (
+                                        <motion.button
+                                          key={emoji}
+                                          whileHover={{ scale: 1.5, y: -8 }}
+                                          whileTap={{ scale: 0.95 }}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleReact(msg, emoji);
+                                            setIsEmojiPickerExpanded(false);
+                                          }}
+                                          className="text-2xl p-1 hover:bg-slate-800/40 rounded-full transition-all duration-200"
+                                        >
+                                          {emoji}
+                                        </motion.button>
+                                      ))}
+                                    </motion.div>
+                                  )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         </div>
-                      ) : (
-                        <button
-                          onClick={() => handleReport(msg)}
-                          disabled={reportingMsgId === msg.id}
-                          className="flex items-center gap-2 text-rose-400 font-bold text-xs sm:text-sm hover:text-rose-600 transition-all disabled:opacity-50"
-                        >
-                          <AlertTriangle className="w-4 h-4" />
-                          <span>{reportingMsgId === msg.id ? 'REPORTING...' : 'REPORT MESSAGE'}</span>
-                        </button>
-                      )}
+
+                        {msg.isReported ? (
+                          <div className="flex items-center gap-2 text-red-600 font-black text-[10px] sm:text-xs bg-red-950/40 px-3 py-1.5 rounded-full border border-red-900/40 shadow-sm uppercase tracking-widest">
+                            <ShieldAlert className="w-4 h-4" />
+                            <span>REPORTED</span>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleReport(msg)}
+                            disabled={reportingMsgId === msg.id}
+                            className="flex items-center gap-2 text-red-900 font-black text-[10px] sm:text-xs hover:text-red-500 transition-all disabled:opacity-50 uppercase tracking-widest"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>{reportingMsgId === msg.id ? 'REPORTING...' : 'REPORT MESSAGE'}</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>

@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import SendMessage from './pages/SendMessage';
 import Landing from './pages/Landing';
+import Admin from './pages/Admin';
 import FloatingBackground from './components/FloatingBackground';
 
 function App() {
@@ -36,16 +37,16 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center relative">
+      <div className="min-h-screen flex items-center justify-center relative bg-slate-950">
         <FloatingBackground />
-        <div className="w-12 h-12 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin relative z-10"></div>
+        <div className="w-12 h-12 border-4 border-slate-900 border-t-red-600 rounded-full animate-spin relative z-10"></div>
       </div>
     );
   }
 
   return (
     <Router>
-      <div className="min-h-screen selection:bg-pink-100 selection:text-pink-600 relative overflow-hidden">
+      <div className="min-h-screen selection:bg-red-900 selection:text-white relative overflow-hidden bg-slate-950 text-slate-300">
         <AnimatePresence>
           {showTerms && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -59,73 +60,64 @@ function App() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="glass-morphism p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] w-full max-w-md shadow-2xl relative z-10 border border-white/20 overflow-hidden"
+                className="bg-slate-950/90 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[3rem] w-full max-w-lg shadow-2xl relative z-10 border border-red-900/30 overflow-hidden backdrop-blur-xl"
               >
-                <div className="absolute top-0 right-0 w-24 h-24 accent-gradient opacity-20 blur-3xl -mr-12 -mt-12 rounded-full" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 blur-3xl -mr-16 -mt-16 rounded-full" />
 
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 accent-gradient rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-pink-200 shimmer">
-                    <Gavel className="text-white w-5 h-5 sm:w-6 sm:h-6" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-950/20 rounded-2xl flex items-center justify-center mb-4 border border-red-900/30 shadow-xl shadow-red-900/10 rotate-3">
+                    <Gavel className="text-red-600 w-6 h-6 sm:w-8 sm:h-8" />
                   </div>
 
-                  <h2 className="text-lg sm:text-xl font-black text-slate-800 mb-1 tracking-tight">Community Standards</h2>
-                  <p className="text-slate-500 font-medium mb-4 text-[10px] sm:text-xs">
-                    Welcome to <span className="text-pink-500 font-bold">Whisp</span>. Please agree to these terms:
+                  <h2 className="text-xl sm:text-3xl font-black text-white mb-2 tracking-tightest uppercase italic">COMMUNITY RULES</h2>
+                  <p className="text-slate-500 font-black mb-6 text-[10px] sm:text-xs uppercase tracking-widest leading-relaxed">
+                    Guidelines for using <span className="text-red-600">WHISP</span>:
                   </p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full mb-4">
-                    <div className="flex items-center gap-2 p-2 bg-white/50 rounded-xl border border-pink-50 hover:border-pink-200 transition-colors group">
-                      <div className="w-7 h-7 rounded-lg bg-pink-50 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-all">
-                        <AlertTriangle className="w-3.5 h-3.5 text-pink-500 group-hover:text-white" />
+                  <div className="grid grid-cols-1 gap-3 w-full mb-8">
+                    <div className="flex items-center gap-4 p-4 bg-slate-900/50 rounded-2xl border border-red-900/10 hover:border-red-900/30 transition-all group">
+                      <div className="w-10 h-10 rounded-xl bg-red-950/20 flex items-center justify-center shrink-0 border border-red-900/20 group-hover:bg-red-600 group-hover:text-white transition-all">
+                        <AlertTriangle className="w-5 h-5 text-red-600 group-hover:text-white" />
                       </div>
                       <div className="text-left">
-                        <h4 className="font-bold text-slate-700 text-[10px]">No Inappropriate Content</h4>
-                        <p className="text-[8px] text-slate-500 leading-tight">Do not use offensive, vulgar, or inappropriate words.</p>
+                        <h4 className="font-black text-white text-xs uppercase tracking-tight">RESPECT OTHERS</h4>
+                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-tighter leading-tight opacity-70">Hate speech, bullying, or vulgar messages will be removed.</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 p-2 bg-white/50 rounded-xl border border-pink-50 hover:border-pink-200 transition-colors group">
-                      <div className="w-7 h-7 rounded-lg bg-pink-50 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-all">
-                        <Shield className="w-3.5 h-3.5 text-pink-500 group-hover:text-white" />
+                    <div className="flex items-center gap-4 p-4 bg-slate-900/50 rounded-2xl border border-red-900/10 hover:border-red-900/30 transition-all group">
+                      <div className="w-10 h-10 rounded-xl bg-red-950/20 flex items-center justify-center shrink-0 border border-red-900/20 group-hover:bg-red-600 group-hover:text-white transition-all">
+                        <Shield className="w-5 h-5 text-red-600 group-hover:text-white" />
                       </div>
                       <div className="text-left">
-                        <h4 className="font-bold text-slate-700 text-[10px]">Zero Harassment</h4>
-                        <p className="text-[8px] text-slate-500 leading-tight">Harassing or bullying other user are strictly prohibited.</p>
+                        <h4 className="font-black text-white text-xs uppercase tracking-tight">STAY ANONYMOUS</h4>
+                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-tighter leading-tight opacity-70">Do not share real names or sensitive info to protect your privacy.</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 p-2 bg-white/50 rounded-xl border border-pink-50 hover:border-pink-200 transition-colors group">
-                      <div className="w-7 h-7 rounded-lg bg-pink-50 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-all">
-                        <UserX className="w-3.5 h-3.5 text-pink-500 group-hover:text-white" />
+                    <div className="flex items-center gap-4 p-4 bg-slate-900/50 rounded-2xl border border-red-900/10 hover:border-red-900/30 transition-all group">
+                      <div className="w-10 h-10 rounded-xl bg-red-950/20 flex items-center justify-center shrink-0 border border-red-900/20 group-hover:bg-red-600 group-hover:text-white transition-all">
+                        <UserX className="w-5 h-5 text-red-600 group-hover:text-white" />
                       </div>
                       <div className="text-left">
-                        <h4 className="font-bold text-slate-700 text-[10px]">No Name Mentions</h4>
-                        <p className="text-[8px] text-slate-500 leading-tight"> Do not mention anyone’s name in your message to keep it fully anonymous.</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 p-2 bg-white/50 rounded-xl border border-pink-50 hover:border-pink-200 transition-colors group">
-                      <div className="w-7 h-7 rounded-lg bg-pink-50 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-all">
-                        <Lock className="w-3.5 h-3.5 text-pink-500 group-hover:text-white" />
-                      </div>
-                      <div className="text-left">
-                        <h4 className="font-bold text-slate-700 text-[10px]">Report Abuse</h4>
-                        <p className="text-[8px] text-slate-500 leading-tight">Immediately report any messages that violate these rules.</p>
+                        <h4 className="font-black text-white text-xs uppercase tracking-tight">NO HARASSMENT</h4>
+                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-tighter leading-tight opacity-70">Repeated harassment will result in your account being blocked.</p>
                       </div>
                     </div>
                   </div>
-                  <div className='text-[9px] text-slate-400 mb-4 text-center leading-tight'>
-                    Messages remain safe and anonymous
+
+                  <div className='text-[10px] text-red-900/60 font-black mb-6 text-center uppercase tracking-[0.3em]'>
+                    Ready to Continue
                   </div>
 
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleAcceptTerms}
-                    className="w-full accent-gradient py-3 rounded-xl font-black text-white text-sm sm:text-base shadow-lg shadow-pink-200 flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                    className="w-full accent-gradient py-4 rounded-xl font-black text-white text-sm sm:text-base shadow-xl shadow-red-900/20 flex items-center justify-center gap-3 transition-all hover:opacity-95 uppercase tracking-widest shimmer"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    Agree & Continue
+                    <CheckCircle2 className="w-5 h-5" />
+                    I AGREE
                   </motion.button>
                 </div>
               </motion.div>
@@ -137,6 +129,7 @@ function App() {
         <div className="relative z-10 w-full h-full min-h-screen">
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
             <Route
               path="/dashboard"
               element={<Dashboard />}
@@ -145,6 +138,11 @@ function App() {
               path="/message/:userId"
               element={<SendMessage />}
             />
+            <Route
+              path="/admin"
+              element={<Admin />}
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </div>

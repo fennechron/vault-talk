@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, AlertTriangle, UserX, MessageSquare, Clock, ShieldCheck, ChevronRight, Lock, Eye, Trash2 } from 'lucide-react';
+import { Shield, AlertTriangle, UserX, MessageSquare, Clock, ShieldCheck, ChevronRight, Lock, Eye, Trash2, RefreshCw } from 'lucide-react';
 import { api } from '../utils/api';
 import FloatingBackground from '../components/FloatingBackground';
 
@@ -65,29 +65,29 @@ const Admin = () => {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="glass-morphism p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative overflow-hidden"
+                    className="bg-slate-950/80 border-2 border-red-900/30 p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative overflow-hidden backdrop-blur-xl"
                 >
-                    <div className="absolute top-0 right-0 w-32 h-32 accent-gradient opacity-10 blur-3xl -mr-16 -mt-16 rounded-full"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-900/10 blur-3xl -mr-16 -mt-16 rounded-full pointer-events-none"></div>
 
                     <div className="flex flex-col items-center mb-8">
-                        <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center border border-pink-100 mb-4 shadow-lg shimmer">
-                            <Shield className="w-8 h-8 text-pink-500" />
+                        <div className="w-16 h-16 bg-red-950/20 rounded-2xl flex items-center justify-center border border-red-900/30 mb-4 shadow-xl shadow-red-900/10 rotate-3">
+                            <Shield className="w-8 h-8 text-red-600" />
                         </div>
-                        <h1 className="text-2xl font-black text-slate-800 tracking-tight">Admin Access</h1>
-                        <p className="text-slate-500 text-sm font-medium">Enter credentials to moderate Whisp</p>
+                        <h1 className="text-2xl font-black text-white tracking-tightest uppercase italic">Admin Login</h1>
+                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Please enter administrator password</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-4">
                         <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-300 w-5 h-5 pointer-events-none" />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5 pointer-events-none" />
                             <input
                                 type="password"
                                 placeholder="Admin Password"
-                                className="w-full bg-white border border-pink-100 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:ring-4 focus:ring-pink-100 transition-all font-light placeholder:text-pink-200"
+                                className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-black placeholder:text-slate-800 text-white"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -100,7 +100,7 @@ const Admin = () => {
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
                                     exit={{ opacity: 0, height: 0 }}
-                                    className="text-rose-500 text-xs font-bold bg-rose-50 py-3 px-4 rounded-xl border border-rose-100"
+                                    className="text-red-600 text-[10px] font-black bg-red-950/20 py-3 px-4 rounded-xl border border-red-900/20 uppercase tracking-tighter"
                                 >
                                     {error}
                                 </motion.div>
@@ -110,9 +110,9 @@ const Admin = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full accent-gradient py-4 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-lg shadow-pink-200 disabled:opacity-50"
+                            className="w-full accent-gradient py-4 rounded-xl font-black text-white hover:opacity-95 transition-all shadow-xl shadow-red-900/20 disabled:opacity-50 uppercase tracking-widest shimmer"
                         >
-                            {loading ? 'Authenticating...' : 'Enter Dashboard'}
+                            {loading ? 'AUTHENTICATING...' : 'LOG IN'}
                         </button>
                     </form>
                 </motion.div>
@@ -121,33 +121,33 @@ const Admin = () => {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto px-4 py-8 bg-slate-950 min-h-screen">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-800 tracking-tight">Moderation <span className="text-pink-500">Center</span></h1>
-                    <p className="text-slate-500 font-medium">Managing {reports.length} reported interactions</p>
+                    <h1 className="text-4xl font-black text-white tracking-tightest uppercase italic">Moderation <span className="text-red-600">Dashboard</span></h1>
+                    <p className="text-slate-500 font-bold text-xs tracking-tight">Moderating {reports.length} reported messages</p>
                 </div>
                 <div className="flex gap-3">
-                    <div className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border border-emerald-100 flex items-center gap-2">
+                    <div className="bg-red-950/40 text-red-600 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-900/30 flex items-center gap-2 shadow-lg shadow-red-900/10">
                         <ShieldCheck className="w-4 h-4" />
-                        Admin Authenticated
+                        ADMIN_ACTIVE
                     </div>
                     <button
                         onClick={() => window.location.reload()}
-                        className="p-2 bg-white border border-pink-100 rounded-xl hover:bg-pink-50 text-pink-500 transition-all shadow-sm"
+                        className="p-2 bg-slate-900 border border-red-900/30 rounded-xl hover:bg-red-950/20 text-red-600 transition-all shadow-xl"
                     >
-                        <Clock className="w-5 h-5" />
+                        <RefreshCw className="w-5 h-5" />
                     </button>
                 </div>
             </header>
 
             {reports.length === 0 ? (
-                <div className="text-center py-24 bg-white/70 backdrop-blur-md rounded-[3rem] border border-pink-100 shadow-xl">
-                    <div className="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <ShieldCheck className="w-10 h-10 text-pink-200" />
+                <div className="text-center py-24 bg-slate-900/50 border border-red-900/20 rounded-[3rem] shadow-xl">
+                    <div className="w-20 h-20 bg-red-950/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-900/30">
+                        <ShieldCheck className="w-10 h-10 text-red-900" />
                     </div>
-                    <h3 className="text-2xl font-black text-slate-400">Clear Skies</h3>
-                    <p className="text-slate-400 font-medium">No messages currently reported for review.</p>
+                    <h3 className="text-2xl font-black text-slate-700 uppercase tracking-widest italic">NO REPORTS</h3>
+                    <p className="text-slate-500 font-bold text-[10px] tracking-tight mt-2">No messages have been reported yet.</p>
                 </div>
             ) : (
                 <div className="grid gap-6">
@@ -157,47 +157,48 @@ const Admin = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="bg-white/70 backdrop-blur-md border border-pink-100 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row gap-8 relative overflow-hidden"
+                            className="bg-slate-950 border border-red-900/20 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row gap-8 relative overflow-hidden group hover:border-red-600/30 transition-all hover:bg-red-950/10"
                         >
                             <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="px-3 py-1 bg-rose-50 text-rose-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-rose-100">
+                                    <div className="px-3 py-1 bg-red-950/40 text-red-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-red-900/40">
                                         Reported Message
                                     </div>
-                                    <span className="text-slate-400 text-xs font-medium">
+                                    <span className="text-slate-600 text-[10px] font-bold tracking-tight">
                                         {report.reportedAt ? new Date(report.reportedAt.seconds * 1000).toLocaleString() : 'N/A'}
                                     </span>
                                 </div>
 
-                                <div className="bg-pink-50/30 p-6 rounded-2xl border border-pink-50 mb-6 italic relative">
-                                    <MessageSquare className="absolute -top-3 -left-3 w-8 h-8 text-pink-100" />
-                                    <p className="text-xl font-medium text-slate-700 leading-relaxed">"{report.text}"</p>
+                                <div className="bg-red-950/20 p-6 rounded-2xl border border-red-900/10 mb-6 italic relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-red-600/5 rounded-full blur-2xl"></div>
+                                    <MessageSquare className="absolute -top-3 -left-3 w-8 h-8 text-red-900/20" />
+                                    <p className="text-lg font-medium text-slate-200 leading-relaxed tracking-tight italic">"{report.text}"</p>
                                 </div>
 
-                                <div className="flex flex-wrap gap-4 text-xs font-bold uppercase tracking-wider">
-                                    <div className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl border border-slate-200">
-                                        Recipient: <span className="text-slate-800">{report.recipientId}</span>
+                                <div className="flex flex-wrap gap-4 text-[10px] font-bold tracking-tight">
+                                    <div className="bg-slate-900 text-slate-500 px-4 py-2 rounded-xl border border-red-900/10">
+                                        RECIPIENT: <span className="text-slate-300">{report.recipientId}</span>
                                     </div>
-                                    <div className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl border border-slate-200">
-                                        Sender: <span className="text-pink-500">{report.senderId}</span>
+                                    <div className="bg-slate-900 text-slate-500 px-4 py-2 rounded-xl border border-red-900/10">
+                                        SENDER: <span className="text-red-600">{report.senderId}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="lg:w-72 lg:border-l border-pink-100 lg:pl-8 flex flex-col justify-center">
+                            <div className="lg:w-72 lg:border-l border-red-900/20 lg:pl-8 flex flex-col justify-center">
                                 <div className="mb-6">
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Account Status</h4>
+                                    <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-4">User Status</h4>
                                     <div className="space-y-3">
-                                        <div className="flex justify-between items-center text-sm font-bold">
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                                             <span className="text-slate-500">Warnings</span>
-                                            <span className={`px-2 py-0.5 rounded-lg ${infractions[report.senderId]?.warnings > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
+                                            <span className={`px-2 py-0.5 rounded-lg ${infractions[report.senderId]?.warnings > 0 ? 'bg-amber-950/40 text-amber-500 border border-amber-900/30' : 'bg-slate-900 text-slate-700'}`}>
                                                 {infractions[report.senderId]?.warnings || 0}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-center text-sm font-bold">
-                                            <span className="text-slate-500">Status</span>
-                                            <span className={`px-2 py-0.5 rounded-lg ${infractions[report.senderId]?.isBlocked ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                                {infractions[report.senderId]?.isBlocked ? 'Blocked' : 'Active'}
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                            <span className="text-slate-500">Account Status</span>
+                                            <span className={`px-2 py-0.5 rounded-lg ${infractions[report.senderId]?.isBlocked ? 'bg-red-950/40 text-red-600 border border-red-600/30' : 'bg-emerald-950/40 text-emerald-600 border border-emerald-900/30'}`}>
+                                                {infractions[report.senderId]?.isBlocked ? 'BLOCKED' : 'ACTIVE'}
                                             </span>
                                         </div>
                                     </div>
@@ -207,7 +208,7 @@ const Admin = () => {
                                     <button
                                         onClick={() => handleWarning(report.senderId)}
                                         disabled={report.senderId === 'anonymous' || infractions[report.senderId]?.isBlocked}
-                                        className="flex items-center justify-center gap-2 bg-amber-50 text-amber-600 border border-amber-100 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-amber-100 transition-colors disabled:opacity-30"
+                                        className="flex items-center justify-center gap-2 bg-amber-950/20 text-amber-600 border border-amber-900/30 py-3 rounded-xl font-bold text-[10px] tracking-wider hover:bg-amber-900/20 transition-all disabled:opacity-10 shadow-sm"
                                     >
                                         <AlertTriangle className="w-4 h-4" />
                                         Issue Warning
@@ -215,15 +216,15 @@ const Admin = () => {
                                     <button
                                         onClick={() => handleBlock(report.senderId)}
                                         disabled={report.senderId === 'anonymous' || infractions[report.senderId]?.isBlocked}
-                                        className="flex items-center justify-center gap-2 bg-rose-50 text-rose-500 border border-rose-100 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-rose-100 transition-colors disabled:opacity-30"
+                                        className="flex items-center justify-center gap-2 bg-red-950/20 text-red-600 border border-red-900/30 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all disabled:opacity-10 shadow-lg shadow-red-900/10"
                                     >
                                         <UserX className="w-4 h-4" />
-                                        Disable Account
+                                        Block User
                                     </button>
                                 </div>
                                 {report.senderId === 'anonymous' && (
-                                    <p className="text-[9px] text-slate-400 mt-4 text-center italic font-medium leading-tight">
-                                        This user sent the message anonymously without a temporary session or login, moderation actions are limited.
+                                    <p className="text-[9px] text-red-900 font-black mt-4 text-center italic uppercase leading-tight tracking-tighter opacity-70">
+                                        ANONYMOUS SENDER. RESTRICTED MODERATION.
                                     </p>
                                 )}
                             </div>

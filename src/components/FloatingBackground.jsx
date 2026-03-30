@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Send, Heart, Sparkles } from 'lucide-react';
+import { Skull, Zap, ShieldAlert, Terminal, Ban } from 'lucide-react';
 
 const floatingElements = [
-  { icon: MessageCircle, size: 32, top: '20%', left: '15%', delay: 0, duration: 12, rotate: -15, y: -50, x: 30 },
-  { icon: Send, size: 28, top: '65%', left: '85%', delay: 1, duration: 15, rotate: 25, y: -60, x: -40 },
-  { icon: Heart, size: 36, top: '80%', left: '10%', delay: 2, duration: 14, rotate: 10, y: -40, x: 20 },
-  { icon: Sparkles, size: 30, top: '15%', left: '75%', delay: 0.5, duration: 18, rotate: -20, y: -45, x: -25 },
-  { icon: MessageCircle, size: 40, top: '45%', left: '5%', delay: 1.5, duration: 16, rotate: 15, y: -35, x: 45 },
+  { icon: Skull, size: 32, top: '20%', left: '15%', delay: 0, duration: 12, rotate: -15, y: -50, x: 30 },
+  { icon: Zap, size: 28, top: '65%', left: '85%', delay: 1, duration: 15, rotate: 25, y: -60, x: -40 },
+  { icon: ShieldAlert, size: 36, top: '80%', left: '10%', delay: 2, duration: 14, rotate: 10, y: -40, x: 20 },
+  { icon: Terminal, size: 30, top: '15%', left: '75%', delay: 0.5, duration: 18, rotate: -20, y: -45, x: -25 },
+  { icon: Ban, size: 40, top: '45%', left: '5%', delay: 1.5, duration: 16, rotate: 15, y: -35, x: 45 },
 ];
 
 const FloatingBackground = () => {
@@ -18,7 +18,7 @@ const FloatingBackground = () => {
         return (
           <motion.div
             key={i}
-            className="absolute flex items-center justify-center p-4 bg-white/40 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_rgba(244,114,182,0.3)] border border-white/60"
+            className="absolute flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_rgba(220,38,38,0.2)] border border-red-900/20"
             style={{ top: el.top, left: el.left, rotate: el.rotate }}
             animate={{
               y: [0, el.y, 0],
@@ -32,7 +32,7 @@ const FloatingBackground = () => {
               ease: "easeInOut",
             }}
           >
-            <Icon className="text-pink-500" size={el.size} strokeWidth={2.5} />
+            <Icon className="text-red-600 opacity-60" size={el.size} strokeWidth={2.5} />
           </motion.div>
         );
       })}
