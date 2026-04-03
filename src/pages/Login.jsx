@@ -128,9 +128,9 @@ const Login = () => {
       >
         <div className="flex flex-col items-center mb-6 sm:mb-10">
           <div className="w-16 h-16 sm:w-20 sm:h-20 accent-gradient rounded-xl sm:rounded-[1.5rem] flex items-center justify-center mb-4 sm:mb-6 shadow-2xl shadow-red-900/30 shimmer">
-            <Terminal className="text-white w-8 h-8 sm:w-10 sm:h-10" />
+            <LogIn className="text-white w-8 h-8 sm:w-10 sm:h-10" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tightest text-center uppercase italic">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight text-center uppercase italic">
             {isLogin ? 'Sign In' : 'Sign Up'}
           </h1>
           <p className="text-slate-400 mt-2 sm:mt-3 text-center max-w-[280px] text-sm sm:text-base font-bold tracking-tight">
@@ -182,7 +182,7 @@ const Login = () => {
             </motion.div>
           )}
           <div className="relative">
-            <Activity className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5" />
             <input
               type="email"
               placeholder="College Email (@ceconline.edu)"
@@ -239,7 +239,7 @@ const Login = () => {
       </motion.div>
 
       <footer className="sm:absolute bottom-8 left-0 right-0 text-center text-slate-600 text-[10px] sm:text-xs font-bold tracking-widest pb-8 sm:pb-0 uppercase">
-        <p>© 2026 Whisp. Hardened by <a href="https://fennechron.com" target="_blank" rel="noopener noreferrer" className="text-red-900/40 hover:text-red-600 font-bold transition-colors">FENNECHRON LABS</a>.</p>
+        <p>© 2026 Whisp. Secured by <a href="https://fennechron.com" target="_blank" rel="noopener noreferrer" className="text-red-900/40 hover:text-red-600 font-bold transition-colors">FENNECHRON LABS</a>.</p>
       </footer>
     </div>
   );

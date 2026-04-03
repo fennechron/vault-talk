@@ -282,5 +282,82 @@ export const api = {
       console.error('API Error (getInfractions):', error);
       throw error;
     }
+  },
+  /**
+   * Admin: Deletes a message from a user's inbox.
+   * @param {string} adminPassword
+   * @param {string} recipientId
+   * @param {string} messageId
+   * @param {string} reportId
+   */
+  async deleteMessage(adminPassword, recipientId, messageId, reportId) {
+    try {
+      const response = await fetch(`${API_URL}/admin/messages`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': adminPassword
+        },
+        body: JSON.stringify({ recipientId, messageId, reportId }),
+      });
+      if (!response.ok) throw new Error('Failed to delete message');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (deleteMessage):', error);
+      throw error;
+    }
+  },
+  /**
+   * Admin: Deletes ALL reported messages and clears reports.
+   * @param {string} adminPassword
+   */
+  async deleteAllReportedMessages(adminPassword) {
+    try {
+      const response = await fetch(`${API_URL}/admin/reports/clear`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': adminPassword
+        }
+      });
+      if (!response.ok) throw new Error('Failed to clear reported messages');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (deleteAllReportedMessages):', error);
+      throw error;
+    }
+  },
+  /**
+   * Throws a new paper ball into the global pool.
+   * @param {string} text
+   * @param {string} senderId
+   */
+  async throwPaperBall(text, senderId) {
+    try {
+      const response = await fetch(`${API_URL}/paper-balls/throw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text, senderId }),
+      });
+      if (!response.ok) throw new Error('Failed to throw paper ball');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (throwPaperBall):', error);
+      throw error;
+    }
+  },
+  /**
+   * Catches a random paper ball from the global pool.
+   */
+  async catchPaperBall() {
+    try {
+      const response = await fetch(`${API_URL}/paper-balls/catch`);
+      if (!response.ok) throw new Error('Failed to catch paper ball');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (catchPaperBall):', error);
+      throw error;
+    }
   }
 };

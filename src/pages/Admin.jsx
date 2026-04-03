@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, AlertTriangle, UserX, MessageSquare, Clock, ShieldCheck, ChevronRight, Lock, Eye, Trash2, RefreshCw } from 'lucide-react';
+import { Shield, AlertTriangle, UserX, MessageSquare, Clock, ShieldCheck, ChevronRight, Lock, Eye, Trash2, RefreshCw, ShieldAlert, ShieldOff } from 'lucide-react';
 import { api } from '../utils/api';
 import FloatingBackground from '../components/FloatingBackground';
 
@@ -60,6 +60,43 @@ const Admin = () => {
             setInfractions(prev => ({ ...prev, [userId]: updatedData }));
         } catch (err) {
             alert("Failed to block user: " + err.message);
+        }
+    };
+
+    const handleDeleteMessage = async (recipientId, messageId, reportId) => {
+        if (!window.confirm("Are you sure you want to delete this message from the receiver's inbox? This action cannot be undone.")) return;
+        try {
+            await api.deleteMessage(password, recipientId, messageId, reportId);
+            alert("Message deleted and report updated.");
+            // For now, let's keep the report but maybe show a visual indicator.
+            // Actually, usually deleting the message is the action taken on the report.
+            // Let's just alert success for now and maybe refresh reports?
+            alert("Message deleted successfully.");
+
+            // Re-fetch reports to see the latest state (if the report is removed or updated)
+            const fetchedReports = await api.getAdminReports(password);
+            setReports(fetchedReports);
+        } catch (err) {
+            alert("Failed to delete message: " + err.message);
+        }
+    };
+
+    const handleDeleteAllMessages = async () => {
+        const confirmMsg = "Are you sure you want to delete ALL reported messages from receivers' inboxes and clear all reports? This action is IRREVERSIBLE and will affect all listed reports.";
+        if (!window.confirm(confirmMsg)) return;
+
+        try {
+            setLoading(true);
+            const result = await api.deleteAllReportedMessages(password);
+            alert(result.message || "All reported messages deleted and reports cleared.");
+
+            // Re-fetch reports (should be empty now)
+            const fetchedReports = await api.getAdminReports(password);
+            setReports(fetchedReports);
+        } catch (err) {
+            alert("Failed to clear all reports: " + err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -132,6 +169,16 @@ const Admin = () => {
                         <ShieldCheck className="w-4 h-4" />
                         ADMIN_ACTIVE
                     </div>
+                    {reports.length > 0 && (
+                        <button
+                            onClick={handleDeleteAllMessages}
+                            disabled={loading}
+                            className="bg-red-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-red-900/40 hover:bg-red-700 transition-all disabled:opacity-50"
+                        >
+                            <ShieldAlert className="w-4 h-4" />
+                            Delete All Reported
+                        </button>
+                    )}
                     <button
                         onClick={() => window.location.reload()}
                         className="p-2 bg-slate-900 border border-red-900/30 rounded-xl hover:bg-red-950/20 text-red-600 transition-all shadow-xl"
@@ -164,6 +211,12 @@ const Admin = () => {
                                     <div className="px-3 py-1 bg-red-950/40 text-red-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-red-900/40">
                                         Reported Message
                                     </div>
+                                    {report.isMessageDeleted && (
+                                        <div className="px-3 py-1 bg-slate-900 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-slate-800 flex items-center gap-1">
+                                            <ShieldOff className="w-3 h-3" />
+                                            Deleted
+                                        </div>
+                                    )}
                                     <span className="text-slate-600 text-[10px] font-bold tracking-tight">
                                         {report.reportedAt ? new Date(report.reportedAt.seconds * 1000).toLocaleString() : 'N/A'}
                                     </span>
@@ -220,6 +273,14 @@ const Admin = () => {
                                     >
                                         <UserX className="w-4 h-4" />
                                         Block User
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteMessage(report.recipientId, report.messageId, report.id)}
+                                        disabled={report.isMessageDeleted}
+                                        className="flex items-center justify-center gap-2 bg-slate-900 text-slate-400 border border-slate-800 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-lg disabled:opacity-20 disabled:hover:bg-slate-900 disabled:hover:text-slate-400 disabled:hover:border-slate-800"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        {report.isMessageDeleted ? 'Message Deleted' : 'Delete for Receiver'}
                                     </button>
                                 </div>
                                 {report.senderId === 'anonymous' && (

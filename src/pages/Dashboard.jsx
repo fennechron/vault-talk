@@ -4,9 +4,10 @@ import { collection, onSnapshot, doc, setDoc, getDoc } from 'firebase/firestore'
 import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, reload, signOut } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, LogOut, Search, Inbox as InboxIcon, Users, MessageSquare, X, CheckCircle, ArrowRight, Home, Lock, Mail, Activity, AlertTriangle, Zap, Bell, RefreshCw, UserPlus, Skull, ShieldAlert, Terminal, Plus } from 'lucide-react';
+import { Send, User, LogOut, Search, Inbox as InboxIcon, Users, MessageSquare, X, CheckCircle, ArrowRight, Home, Lock, Mail, Activity, AlertTriangle, Zap, Bell, RefreshCw, UserPlus, Skull, ShieldAlert, Terminal, Plus, LogIn } from 'lucide-react';
 import { api } from '../utils/api';
 import CryptoJS from 'crypto-js';
+import PaperBallInteraction from '../components/PaperBallInteraction';
 
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
@@ -490,10 +491,10 @@ const Dashboard = () => {
             </button>
           ) : (
             <button
-              onClick={() => navigate('/login')}
-              className="p-2.5 sm:p-3 bg-slate-900 border border-red-900/20 rounded-xl sm:rounded-2xl hover:bg-red-950/20 text-red-600 transition-all shadow-sm flex items-center justify-center"
+              onClick={() => setActiveTab('inbox')}
+              className="p-2.5 sm:p-3 bg-slate-900 border border-red-900/20 rounded-xl sm:rounded-2xl hover:bg-red-950/20 text-red-600 transition-all shadow-sm flex items-center justify-center group"
             >
-              <Terminal className="w-5 h-5 sm:w-6 sm:h-6" />
+              <LogIn className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
             </button>
           )}
         </div>
@@ -612,6 +613,9 @@ const Dashboard = () => {
               />
             </div>
 
+            {/* Paper Ball Interaction */}
+            <PaperBallInteraction />
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredUsers.map((user, index) => (
                 <motion.div
@@ -652,16 +656,14 @@ const Dashboard = () => {
                 className="text-center py-16 sm:py-24 bg-slate-950/70 backdrop-blur-xl rounded-[2rem] sm:rounded-[3rem] border border-red-900/30 shadow-2xl max-w-xl mx-auto relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-48 h-48 bg-red-900/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                <div className="w-20 h-20 bg-red-950/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-900/20 rotate-3 border border-red-900/30">
-                  {isSignUp ? <UserPlus className="w-10 h-10 text-red-600" /> : <Lock className="w-10 h-10 text-red-600" />}
+                <div className="w-20 h-20 bg-red-950/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-900/20 border border-red-900/30">
+                  {isSignUp ? <UserPlus className="w-10 h-10 text-red-600" /> : <LogIn className="w-10 h-10 text-red-600" />}
                 </div>
-                <h3 className="text-2xl sm:text-4xl font-black text-white mb-4 tracking-tightest uppercase italic">
-                  {isSignUp ? 'CREATE ACCOUNT' : 'PRIVATE INBOX'}
+                <h3 className="text-2xl sm:text-4xl font-bold text-white mb-4 tracking-tightest uppercase italic">
+                  {isSignUp ? 'Sign Up' : 'Sign In'}
                 </h3>
-                <p className="text-slate-500 font-black mb-8 px-6 text-[10px] sm:text-xs uppercase tracking-widest">
-                  {isSignUp ? 'Sign up to start messaging.' : 'Log in with your '}
-                  {!isSignUp && <strong className="text-red-600">@ceconline.edu</strong>}
-                  {!isSignUp && ' account to see your messages.'}
+                <p className="text-slate-500 font-bold mb-8 px-6 text-xs tracking-tight">
+                  {isSignUp ? 'Create an account to start messaging.' : 'Access your private message stream.'}
                 </p>
 
                 <AnimatePresence>
@@ -693,34 +695,34 @@ const Dashboard = () => {
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5 pointer-events-none" />
                       <input
                         type="text"
-                        placeholder="Identification Name"
+                        placeholder="Your Name"
                         value={signupName}
                         onChange={(e) => setSignupName(e.target.value)}
                         required={isSignUp}
-                        className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-black placeholder:text-slate-700 text-sm sm:text-base text-white"
+                        className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-bold placeholder:text-slate-700 text-sm sm:text-base text-white"
                       />
                     </div>
                   )}
                   <div className="relative">
-                    <Activity className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5 pointer-events-none" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5 pointer-events-none" />
                     <input
                       type="email"
-                      placeholder="Protocol Address (@ceconline.edu)"
+                      placeholder="College Email (@ceconline.edu)"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
-                      className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-black placeholder:text-slate-700 text-sm sm:text-base text-white"
+                      className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-bold placeholder:text-slate-700 text-sm sm:text-base text-white"
                     />
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-red-900/50 w-5 h-5 pointer-events-none" />
                     <input
                       type="password"
-                      placeholder="Protocol Key"
+                      placeholder="Password"
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
-                      className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-black placeholder:text-slate-700 text-sm sm:text-base text-white"
+                      className="w-full bg-slate-900/50 border border-red-900/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-4 focus:ring-red-900/10 transition-all font-bold placeholder:text-slate-700 text-sm sm:text-base text-white"
                     />
                   </div>
                   <button
@@ -728,7 +730,7 @@ const Dashboard = () => {
                     disabled={isAuthenticating}
                     className="w-full accent-gradient py-3.5 mt-2 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-lg shadow-red-900/30 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center gap-2 uppercase tracking-widest shimmer"
                   >
-                    {isAuthenticating ? 'AUTHENTICATING...' : (isSignUp ? 'INITIALIZE UNIT' : 'ESTABLISH LINKS')}
+                    {isAuthenticating ? 'AUTHENTICATING...' : (isSignUp ? 'SIGN UP' : 'SIGN IN')}
                   </button>
                 </form>
 
@@ -748,15 +750,15 @@ const Dashboard = () => {
                   Sign in with Google
                 </button>
 
-                <p className="mt-8 text-[10px] text-slate-600 font-black uppercase tracking-widest">
-                  {isSignUp ? 'ALREADY HAVE AN ACCOUNT?' : "NEW TO WHISP?"}
+                <p className="mt-8 text-center text-slate-500 text-xs font-bold tracking-tight">
+                  {isSignUp ? "Already have an account?" : "New to Whisp?"}
                   <button
                     onClick={() => {
                       setIsSignUp(!isSignUp);
                       setAuthError('');
                       setAuthSuccess('');
                     }}
-                    className="ml-2 text-red-600 font-black hover:underline underline-offset-4 decoration-red-900/50"
+                    className="ml-2 text-red-600 hover:text-red-500 transition-colors font-bold underline decoration-red-900/40 underline-offset-4"
                   >
                     {isSignUp ? 'SIGN IN' : 'SIGN UP'}
                   </button>
@@ -768,13 +770,14 @@ const Dashboard = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-16 sm:py-24 bg-slate-950/70 backdrop-blur-xl rounded-[2rem] sm:rounded-[3rem] border border-red-900/30 shadow-2xl max-w-xl mx-auto relative overflow-hidden px-6"
               >
-                <div className="w-20 h-20 bg-red-950/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-red-900/20 rotate-3 border border-red-900/30">
-                  <Activity className="w-10 h-10 text-red-600" />
+                <div className="w-20 h-20 bg-red-950/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-red-900/20 border border-red-900/30">
+                  <Mail className="w-10 h-10 text-red-600" />
                 </div>
-                <h3 className="text-2xl sm:text-4xl font-black text-white mb-4 tracking-tightest uppercase italic">VERIFICATION REQUIRED</h3>
-                <p className="text-slate-500 font-black mb-8 text-[10px] sm:text-xs uppercase tracking-widest leading-relaxed">
-                  Verification email sent to <strong className="text-red-600">{auth.currentUser.email}</strong>.
-                  Check your email to verify your account.
+                <h3 className="text-2xl sm:text-4xl font-bold text-white mb-4 tracking-tightest uppercase italic">Verify <span className="text-red-600">Email</span></h3>
+                <p className="text-slate-500 font-bold mb-8 text-xs tracking-tight leading-relaxed">
+                  We've sent a verification link to <br />
+                  <span className="text-slate-300 font-bold">{auth.currentUser.email}</span>. <br />
+                  Please check your inbox to activate your account.
                 </p>
 
                 <AnimatePresence>
@@ -783,30 +786,30 @@ const Dashboard = () => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="mb-6 text-emerald-500 text-xs font-black bg-emerald-950/20 py-3 rounded-xl border border-emerald-900/40 uppercase tracking-tighter"
+                      className="mb-6 text-emerald-500 text-xs font-bold bg-emerald-950/20 py-3 rounded-xl border border-emerald-900/40 tracking-tight text-center"
                     >
                       {resendSuccess}
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3">
                   <button
                     onClick={handleRefreshStatus}
                     disabled={refreshing}
-                    className="w-full accent-gradient py-4 rounded-xl font-black text-white hover:opacity-90 transition-all shadow-xl shadow-red-900/30 flex items-center justify-center gap-3 disabled:opacity-50 uppercase tracking-widest shimmer"
+                    className="w-full accent-gradient py-4 rounded-xl font-bold text-white hover:opacity-90 transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 uppercase tracking-widest text-sm shimmer"
                   >
                     <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-                    {refreshing ? 'REFRESHING...' : "REFRESH STATUS"}
+                    {refreshing ? 'REFRESHING...' : "I HAVE VERIFIED"}
                   </button>
 
                   <button
                     onClick={handleResendVerification}
                     disabled={resendingEmail}
-                    className="w-full bg-slate-900 border-2 border-red-900/20 py-3 rounded-xl font-black text-slate-400 hover:bg-red-950/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-[10px] uppercase tracking-widest"
+                    className="w-full bg-slate-900 border border-red-900/20 py-3 rounded-xl font-bold text-slate-400 hover:text-red-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-xs uppercase tracking-widest"
                   >
                     <Send className="w-4 h-4 text-red-600" />
-                    {resendingEmail ? 'SENDING...' : 'RESEND EMAIL'}
+                    {resendingEmail ? 'RESENDING...' : (resendSuccess || 'RESEND EMAIL')}
                   </button>
 
                   <button
