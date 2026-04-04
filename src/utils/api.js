@@ -359,5 +359,69 @@ export const api = {
       console.error('API Error (catchPaperBall):', error);
       throw error;
     }
+  },
+  /**
+   * Likes a global paper ball.
+   * @param {string} id
+   */
+  async likePaperBall(id) {
+    try {
+      const response = await fetch(`${API_URL}/paper-balls/${id}/like`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to like paper ball');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (likePaperBall):', error);
+      throw error;
+    }
+  },
+  /**
+   * Dislikes a global paper ball.
+   * @param {string} id
+   */
+  async dislikePaperBall(id) {
+    try {
+      const response = await fetch(`${API_URL}/paper-balls/${id}/dislike`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to dislike paper ball');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (dislikePaperBall):', error);
+      throw error;
+    }
+  },
+  /**
+   * Removes a like from a global paper ball.
+   * @param {string} id
+   */
+  async unlikePaperBall(id) {
+    try {
+      const response = await fetch(`${API_URL}/paper-balls/${id}/unlike`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to unlike paper ball');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (unlikePaperBall):', error);
+      throw error;
+    }
+  },
+  /**
+   * Removes a dislike from a global paper ball.
+   * @param {string} id
+   */
+  async undislikePaperBall(id) {
+    try {
+      const response = await fetch(`${API_URL}/paper-balls/${id}/undislike`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to undislike paper ball');
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (undislikePaperBall):', error);
+      throw error;
+    }
   }
 };
